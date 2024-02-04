@@ -1,6 +1,7 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import { getCookie } from "~utils/cookie"
+import storage from "~utils/storage"
 import { getAllDividends, getTradePositions } from "~utils/trade"
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
@@ -12,6 +13,14 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       res.send({
         cookie: null
       })
+      return
+    }
+
+    const storedTradePositionsWithDiv = await storage.get(
+      "tradePositionsWithDiv"
+    )
+    if (storedTradePositionsWithDiv) {
+      res.send(storedTradePositionsWithDiv)
       return
     }
 
@@ -30,6 +39,10 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     })
 
     const dividends = await getAllDividends(formattedPositions)
+
+    await storage.set("tradePositionsWithDiv", {
+      dividends
+    })
 
     res.send({
       dividends

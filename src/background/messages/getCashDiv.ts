@@ -7,6 +7,7 @@ import {
   getCashAccountInterestRate,
   getCashIdentity
 } from "~utils/graphql"
+import storage from "~utils/storage"
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log("Received a message from the content script:", req)
@@ -17,6 +18,12 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       res.send({
         cookie: null
       })
+      return
+    }
+
+    const storedCashAccount = await storage.get("cashAccount")
+    if (storedCashAccount) {
+      res.send(storedCashAccount)
       return
     }
 
@@ -49,6 +56,11 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       getCashAccountBalance(cashAccountId, accessToken),
       getCashAccountInterestRate(cashAccountId, accessToken)
     ])
+
+    await storage.set("cashAccount", {
+      balance: balance,
+      interestRate: interestRate
+    })
 
     res.send({
       balance: balance,
