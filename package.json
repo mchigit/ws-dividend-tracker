@@ -1,5 +1,5 @@
 {
-  "name": "ws-divdend-tracker-v2",
+  "name": "ws-dividend-tracker-v2",
   "displayName": "Ws divdend tracker v2",
   "version": "0.0.1",
   "description": "A basic Plasmo extension.",
@@ -10,6 +10,9 @@
     "package": "plasmo package"
   },
   "dependencies": {
+    "@heroicons/react": "^2.1.1",
+    "@material-tailwind/react": "^2.1.8",
+    "@plasmohq/messaging": "^0.6.2",
     "plasmo": "0.84.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -19,15 +22,20 @@
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",
     "@types/chrome": "0.0.258",
     "@types/node": "20.11.5",
-    "@types/react": "18.2.48",
+    "@types/react": "18.2.42",
     "@types/react-dom": "18.2.18",
     "postcss": "8.4.33",
     "prettier": "3.2.4",
     "typescript": "5.3.3"
   },
   "manifest": {
+    "permissions": [
+      "storage",
+      "cookies"
+    ],
     "host_permissions": [
-      "https://*/*"
+      "*://*.wealthsimple.com/*",
+      "*://*.finance.yahoo.com/*"
     ]
   }
 }
