@@ -1,8 +1,5 @@
 import type { CashAccount } from "~types"
-
-function getYearlyTotal(balance: number, interestRate: number) {
-  return balance * interestRate
-}
+import { getYearlyTotal } from "~utils/graphql"
 
 export default function CashAccountTable(props: { cashAccount: CashAccount }) {
   const { cashAccount } = props

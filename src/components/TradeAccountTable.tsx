@@ -8,8 +8,6 @@ export default function TradeAccountTable(props: {
 
   const positionWithDividends = calculateTotalDividends(tradePositions)
 
-  console.log(positionWithDividends)
-
   const totalDividends = positionWithDividends
     ? positionWithDividends
         .reduce((acc, pos) => acc + pos.totalDividend, 0)

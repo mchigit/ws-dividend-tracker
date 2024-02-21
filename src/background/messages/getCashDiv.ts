@@ -23,8 +23,12 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
 
     const storedCashAccount = await storage.get("cashAccount")
     if (storedCashAccount) {
-      res.send(storedCashAccount)
-      return
+      const { createdAt } = storedCashAccount as any
+
+      if (createdAt + 600000 > new Date().getTime()) {
+        res.send(storedCashAccount)
+        return
+      }
     }
 
     const decodedAuthCookie = JSON.parse(decodeURIComponent(cookie.value))
@@ -59,7 +63,8 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
 
     await storage.set("cashAccount", {
       balance: balance,
-      interestRate: interestRate
+      interestRate: interestRate,
+      createdAt: new Date().getTime()
     })
 
     res.send({

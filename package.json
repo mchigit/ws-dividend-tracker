@@ -1,9 +1,9 @@
 {
-  "name": "ws-dividend-tracker-v2",
-  "displayName": "Ws divdend tracker v2",
-  "version": "0.0.1",
-  "description": "A basic Plasmo extension.",
-  "author": "Plasmo Corp. <foss@plasmo.com>",
+  "name": "ws-dividend-tracker",
+  "displayName": "WealthSimple Divdend Tracker",
+  "version": "3.0.0",
+  "description": "Easily track your dividends on WealthSimple Trade.",
+  "author": "CafDev Studio <caffein.dev@gmail.com>",
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",

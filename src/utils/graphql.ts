@@ -30,6 +30,10 @@ export async function getCashIdentity(clientId: string, token: string) {
   return null
 }
 
+export function getYearlyTotal(balance: number, interestRate: number) {
+  return balance * interestRate
+}
+
 export async function getCashAccountIdentity(
   idenitityId: string,
   token: string

@@ -19,9 +19,14 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     const storedTradePositionsWithDiv = await storage.get(
       "tradePositionsWithDiv"
     )
+
     if (storedTradePositionsWithDiv) {
-      res.send(storedTradePositionsWithDiv)
-      return
+      const { createdAt } = storedTradePositionsWithDiv as any
+
+      if (createdAt + 600000 > new Date().getTime()) {
+        res.send(storedTradePositionsWithDiv)
+        return
+      }
     }
 
     const decodedAuthCookie = JSON.parse(decodeURIComponent(cookie.value))
@@ -41,7 +46,8 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     const dividends = await getAllDividends(formattedPositions)
 
     await storage.set("tradePositionsWithDiv", {
-      dividends
+      dividends,
+      createdAt: new Date().getTime()
     })
 
     res.send({

@@ -17,6 +17,8 @@ import TradeIcon from "data-base64:~assets/tradeIcon.svg"
 import { useState } from "react"
 
 import type { CashAccount, Position } from "~types"
+import { getYearlyTotal } from "~utils/graphql"
+import { calculateTotalDividends } from "~utils/trade"
 
 import CashAccountTable from "./CashAccountTable"
 import TradeAccountTable from "./TradeAccountTable"
@@ -41,9 +43,31 @@ export default function AccountsDashboard(props: {
     setCurrentTab(tab)
   }
 
+  const positionWithDividends = calculateTotalDividends(props.tradePositions)
+  const totalTradeDividends = positionWithDividends
+    ? positionWithDividends.reduce((acc, pos) => acc + pos.totalDividend, 0)
+    : 0
+  const cashYearlyTotal = getYearlyTotal(
+    props.cashAccount.balance.withdrawalBalance / 100,
+    parseFloat(props.cashAccount.interestRate.interestRate)
+  )
+
+  const totalDividends = (totalTradeDividends + cashYearlyTotal).toFixed(2)
+
   return (
     <div className="w-full">
-      <div className="border-b border-gray-200">
+      {/* <h3 className="w-full text-lg font-semibold tracking-tight text-gray-900">
+        Yearly Dividends + Interest: ${totalDividends}
+      </h3> */}
+      <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow">
+        <dt className="truncate text-sm font-medium text-gray-500">
+          Yearly Dividend + Interest
+        </dt>
+        <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+          ${totalDividends}
+        </dd>
+      </div>
+      <div className="border-b border-gray-200 mt-10">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           {tabs.map((tab) => (
             <button
@@ -56,15 +80,6 @@ export default function AccountsDashboard(props: {
                 "group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium bg-none"
               )}
               aria-current={currentTab === tab.name ? "page" : undefined}>
-              {/* <tab.icon
-                className={classNames(
-                  currentTab === tab.name
-                    ? "text-indigo-500"
-                    : "text-gray-400 group-hover:text-gray-500",
-                  "-ml-0.5 mr-2 h-5 w-5"
-                )}
-                aria-hidden="true"
-              /> */}
               <img
                 src={tab.icon}
                 alt=""
