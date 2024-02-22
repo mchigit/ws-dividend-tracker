@@ -1,6 +1,6 @@
 import "~style.css"
 
-import { Spinner } from "@material-tailwind/react"
+import { Alert, Spinner } from "@material-tailwind/react"
 import React, { useEffect, useState } from "react"
 
 import { sendToBackground } from "@plasmohq/messaging"
@@ -47,8 +47,17 @@ function IndexPopup() {
         <div className="p-8 w-full flex flex-col items-center justify-center">
           {loading && <Spinner className="h-12 w-12" />}
           <div className="w-full">
-            {!loading && CashAccount && TradePositions && (
-              <AccountsDashboard tradePositions={TradePositions} cashAccount={CashAccount} />
+            {!loading && CashAccount && TradePositions ? (
+              <AccountsDashboard
+                tradePositions={TradePositions}
+                cashAccount={CashAccount}
+              />
+            ) : (
+              !loading && (
+                <Alert className="rounded-none border-l-4 border-[#FBC361] bg-[#FBC361]/10 font-medium text-blue-gray-900">
+                  Please login to WealthSimple
+                </Alert>
+              )
             )}
           </div>
         </div>
