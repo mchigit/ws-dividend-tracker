@@ -1,0 +1,98 @@
+[
+    {
+        "id": "tfsa-26hqm9cy",
+        "category": "REGISTERED",
+        "createdAt": "2018-01-17T04:58:39.645241Z",
+        "currency": "CAD",
+        "unifiedAccountType": "MANAGED_TFSA",
+        "type": "tfsa"
+    },
+    {
+        "id": "non-registered-em8calcy",
+        "category": "NON_REGISTERED",
+        "createdAt": "2018-01-17T04:58:45.750250Z",
+        "currency": "CAD",
+        "unifiedAccountType": "MANAGED_NON_REGISTERED",
+        "type": "non_registered"
+    },
+    {
+        "id": "tfsa-4j9cntfc",
+        "category": "REGISTERED",
+        "createdAt": "2020-07-09T23:52:19.795027Z",
+        "currency": "CAD",
+        "unifiedAccountType": "MANAGED_TFSA",
+        "type": "tfsa"
+    },
+    {
+        "id": "non-registered-njuqkojw",
+        "category": "NON_REGISTERED",
+        "createdAt": "2020-07-10T00:54:03.202007Z",
+        "currency": "CAD",
+        "unifiedAccountType": "SELF_DIRECTED_NON_REGISTERED",
+        "type": "non_registered"
+    },
+    {
+        "id": "tfsa-9syfhzyx",
+        "category": "REGISTERED",
+        "createdAt": "2020-07-10T00:54:04.657548Z",
+        "currency": "CAD",
+        "unifiedAccountType": "SELF_DIRECTED_TFSA",
+        "type": "tfsa"
+    },
+    {
+        "id": "rrsp-vfkjrmn6",
+        "category": "REGISTERED",
+        "createdAt": "2020-07-10T00:54:05.835374Z",
+        "currency": "CAD",
+        "unifiedAccountType": "SELF_DIRECTED_RRSP",
+        "type": "rrsp"
+    },
+    {
+        "id": "rrsp-mlduqgv4",
+        "category": "REGISTERED",
+        "createdAt": "2021-06-17T21:15:38.249675Z",
+        "currency": "CAD",
+        "unifiedAccountType": "MANAGED_RRSP",
+        "type": "rrsp"
+    },
+    {
+        "id": "ca-cash-msb-F2qguoFcuw",
+        "category": "NON_REGISTERED",
+        "createdAt": "2023-08-08T19:24:28.196197Z",
+        "currency": "CAD",
+        "unifiedAccountType": "CASH",
+        "type": "ca_cash_msb"
+    },
+    {
+        "id": "non-registered-crypto-z5DoQSWN7g",
+        "category": "NON_REGISTERED",
+        "createdAt": "2023-08-27T02:34:56.990707Z",
+        "currency": "CAD",
+        "unifiedAccountType": "SELF_DIRECTED_CRYPTO",
+        "type": "non_registered_crypto"
+    },
+    {
+        "id": "rrsp-rxhHvblrXg",
+        "category": "REGISTERED",
+        "createdAt": "2024-03-16T13:23:03.066760Z",
+        "currency": "USD",
+        "unifiedAccountType": "SELF_DIRECTED_RRSP",
+        "type": "rrsp"
+    },
+    {
+        "id": "tfsa-brirx1pejQ",
+        "category": "REGISTERED",
+        "createdAt": "2024-03-16T13:23:03.097095Z",
+        "currency": "USD",
+        "unifiedAccountType": "SELF_DIRECTED_TFSA",
+        "type": "tfsa"
+    },
+    {
+        "id": "non-registered-6AWhMNp9GA",
+        "category": "NON_REGISTERED",
+        "createdAt": "2024-03-16T13:23:03.150649Z",
+        "currency": "USD",
+        "unifiedAccountType": "SELF_DIRECTED_NON_REGISTERED",
+        "type": "non_registered"
+    }
+]

@@ -13,20 +13,22 @@
   ```
 */
 import CashIcon from "data-base64:~assets/cashIcon.svg"
+import ManagedIcon from "data-base64:~assets/managedIcon.png"
 import TradeIcon from "data-base64:~assets/tradeIcon.svg"
 import { useState } from "react"
 
-import type { CashAccount, Position } from "~types"
+import type { CashAccount, ManagedPosition, Position } from "~types"
 import { getYearlyTotal } from "~utils/graphql"
-import { calculateTotalDividends } from "~utils/trade"
+import { calculateTotalDividends } from "~utils/shared"
 
 import CashAccountTable from "./CashAccountTable"
 import TradeAccountTable from "./TradeAccountTable"
+import ManagedAccountTable from "./ManagedAccountTable"
 
 const tabs = [
   { name: "Cash", href: "#", icon: CashIcon },
-  { name: "Trade", href: "#", icon: TradeIcon }
-  // { name: "Invest", href: "#", icon: UsersIcon }
+  { name: "Trade", href: "#", icon: TradeIcon },
+  { name: "Managed", href: "#", icon: ManagedIcon }
 ]
 
 function classNames(...classes) {
@@ -36,6 +38,7 @@ function classNames(...classes) {
 export default function AccountsDashboard(props: {
   cashAccount: CashAccount
   tradePositions: Position[]
+  ManagedAccData: ManagedPosition[]
 }) {
   const [currentTab, setCurrentTab] = useState<string | null>("Cash")
 
@@ -100,6 +103,9 @@ export default function AccountsDashboard(props: {
         )}
         {currentTab === "Trade" && (
           <TradeAccountTable tradePositions={props.tradePositions} />
+        )}
+        {currentTab === "Managed" && (
+          <ManagedAccountTable managedPositions={props.ManagedAccData} />
         )}
       </div>
     </div>

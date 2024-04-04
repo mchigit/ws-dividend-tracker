@@ -22,7 +22,13 @@ export const getYahooFinanceData = async (position: Position) => {
   }
 
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}?events=div&interval=1d&range=1y`
-  const yahooResp = await fetch(url)
+  let yahooResp = await fetch(url)
+
+  if (yahooResp.status === 404) {
+    stockSymbol = stockSymbol.replace(".TO", "")
+    const newUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}?events=div&interval=1d&range=1y`
+    yahooResp = await fetch(newUrl)
+  }
 
   if (yahooResp.ok) {
     const data = await yahooResp.json()
@@ -43,30 +49,4 @@ export const getAllDividends = async (positions: Position[]) => {
   )
 
   return allStockData
-}
-
-export const calculateTotalDividends = (allStockData: any) => {
-  const totalDividendPerYear = allStockData.dividends
-    .map((stockData) => {
-      if (stockData?.stockData?.events?.dividends) {
-        const dividendEvents = stockData.stockData.events.dividends
-
-        let totalDividend = 0
-        Object.keys(dividendEvents).forEach((key) => {
-          totalDividend += dividendEvents[key].amount
-        })
-
-        return {
-          symbol: stockData.stockData.meta.symbol,
-          totalDividendPerShare: parseFloat(totalDividend.toFixed(2)),
-          totalDividend:
-            parseFloat(totalDividend.toFixed(2)) * stockData.quantity
-        }
-      }
-
-      return null
-    })
-    .filter(Boolean)
-
-  return totalDividendPerYear
 }

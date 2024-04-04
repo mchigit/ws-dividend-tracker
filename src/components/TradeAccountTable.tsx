@@ -1,5 +1,5 @@
 import type { Position } from "~types"
-import { calculateTotalDividends } from "~utils/trade"
+import { calculateTotalDividends } from "~utils/shared"
 
 export default function TradeAccountTable(props: {
   tradePositions: Position[]

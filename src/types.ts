@@ -30,3 +30,20 @@ export type Position = {
   quantity: number
   account_id: string
 }
+
+export type ManagedPosition = {
+  id: string
+  allocation: string
+  className: string
+  currency: string
+  description: string
+  fee: string
+  name: string
+  performance: string
+  symbol: string
+  type: string
+  value: string
+  category: string
+  quantity: string
+  __typename: string
+}

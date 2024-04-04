@@ -13,21 +13,25 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log("Received a message from the content script:", req)
 
   try {
+    const storedCashAccount = await storage.get("cashAccount")
     const cookie = await getCookie()
+
     if (!cookie) {
+      if (storedCashAccount) {
+        return res.send(storedCashAccount)
+      }
+
       res.send({
         cookie: null
       })
       return
     }
 
-    const storedCashAccount = await storage.get("cashAccount")
     if (storedCashAccount) {
       const { createdAt } = storedCashAccount as any
 
       if (createdAt + 600000 > new Date().getTime()) {
-        res.send(storedCashAccount)
-        return
+        return res.send(storedCashAccount)
       }
     }
 
@@ -69,7 +73,8 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
 
     res.send({
       balance: balance,
-      interestRate: interestRate
+      interestRate: interestRate,
+      createdAt: new Date().getTime()
     })
   } catch (error) {
     console.error("Failed to handle", error)

@@ -126,3 +126,32 @@ export async function getCashAccountInterestRate(
 
   return json.data.account
 }
+
+export async function getDividendActivities(accessToken: string) {
+  const now: string = new Date().toISOString()
+  const data = {
+    operationName: "FetchAccountInterestRate",
+    variables: {
+      types: ["DIVIDEND", "INTEREST", "STOCK_DIVIDEND"],
+      first: 50,
+      endDate: now
+    },
+    query:
+      "query FetchAccountInterestRate($accountId: ID!) {\n  account(id: $accountId) {\n    ...AccountInterestRate\n    __typename\n  }\n}\n\nfragment AccountInterestRate on Account {\n  id\n  interestRate: interest_rate\n  interestRateBoosted\n  __typename\n}"
+  }
+
+  const res = await fetch("https://my.wealthsimple.com/graphql", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "X-Ws-Api-Version": "12",
+      "X-Ws-Profile": "invest",
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify(data)
+  })
+
+  const json = await res.json()
+}
+
+// export async function getAllAccountFiniancials(accessToken: string)
