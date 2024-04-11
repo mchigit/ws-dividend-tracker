@@ -36,19 +36,6 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
 
     const activities = await getDividendActivities(accessToken)
 
-    // const tradePositions = await getTradePositions(accessToken)
-
-    // const formattedPositions = tradePositions.map((position: any) => {
-    //   return {
-    //     currency: position.currency,
-    //     stock: position.stock,
-    //     quantity: position.quantity,
-    //     account_id: position.account_id
-    //   }
-    // })
-
-    // const dividends = await getAllDividends(formattedPositions)
-
     await storage.set("tradePositionsWithDiv", {
       activities,
       createdAt: new Date().getTime()

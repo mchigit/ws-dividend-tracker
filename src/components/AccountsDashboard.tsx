@@ -63,8 +63,8 @@ export default function AccountsDashboard(props: {
         Yearly Dividends + Interest: ${totalDividends}
       </h3> */}
       <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow">
-        <dt className="truncate text-sm font-medium text-gray-500">
-          Yearly Dividend + Interest
+        <dt className="my-2 text-sm font-medium text-gray-500">
+          Yearly Dividend + Interest (Exc. Managed Account)
         </dt>
         <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
           ${totalDividends}

@@ -1,7 +1,6 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import { getCookie } from "~utils/cookie"
-import { getDividendActivities } from "~utils/graphql"
 import storage from "~utils/storage"
 import { WealthSimpleClient } from "~utils/wealthsimple"
 
@@ -9,13 +8,13 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log("Received a message from the content script:", req)
 
   try {
-    // const storedActivity = await storage.get("getDividendActivity")
+    const storedManagedAcc = await storage.get("getManagedAcc")
     const cookie = await getCookie()
 
     if (!cookie) {
-      //   if (storedActivity) {
-      //     return res.send(storedActivity)
-      //   }
+      if (storedManagedAcc) {
+        return res.send(storedManagedAcc)
+      }
 
       res.send({
         cookie: null
@@ -23,17 +22,14 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       return
     }
 
-    // if (storedActivity) {
-    //   const { createdAt } = storedActivity as any
+    if (storedManagedAcc) {
+      const { createdAt } = storedManagedAcc as any
 
-    //   if (createdAt + 600000 > new Date().getTime()) {
-    //     res.send(storedActivity)
-    //     return
-    //   }
-    // }
-
-    // const decodedAuthCookie = JSON.parse(decodeURIComponent(cookie.value))
-    // const accessToken = decodedAuthCookie.access_token
+      if (createdAt + 600000 > new Date().getTime()) {
+        res.send(storedManagedAcc)
+        return
+      }
+    }
 
     const wsClient = new WealthSimpleClient(cookie.value)
 
@@ -48,6 +44,11 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
         return await wsClient.getManagedAccountPositions(acc.id)
       })
     )
+
+    await storage.set("getManagedAcc", {
+      allPositions,
+      createdAt: new Date().getTime()
+    })
 
     res.send({
       allPositions,
