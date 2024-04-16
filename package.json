@@ -1,13 +1,14 @@
 {
   "name": "ws-dividend-tracker",
-  "displayName": "WealthSimple Divdend Tracker",
+  "displayName": "WealthSimple Dividend Tracker",
   "version": "3.0.0",
-  "description": "Easily track your dividends on WealthSimple Trade.",
+  "description": "Easily track your dividends on WealthSimple.",
   "author": "CafDev Studio <caffein.dev@gmail.com>",
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",
-    "package": "plasmo package"
+    "package": "plasmo package",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --fix"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
@@ -18,17 +19,22 @@
     "plasmo": "0.84.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "tailwindcss": "3.4.1"
+    "tailwindcss": "3.4.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",
     "@types/chrome": "0.0.258",
     "@types/node": "20.11.5",
     "@types/react": "18.2.42",
     "@types/react-dom": "18.2.18",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
     "postcss": "8.4.33",
     "prettier": "3.2.4",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "typescript-eslint": "^7.7.0"
   },
   "manifest": {
     "permissions": [

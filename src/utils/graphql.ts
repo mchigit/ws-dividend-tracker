@@ -152,6 +152,8 @@ export async function getDividendActivities(accessToken: string) {
   })
 
   const json = await res.json()
+
+  return json
 }
 
 // export async function getAllAccountFiniancials(accessToken: string)

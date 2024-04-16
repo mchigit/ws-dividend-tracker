@@ -1,7 +1,7 @@
 import type { ManagedPosition } from "~types"
 
 const getYahooDividendEventsPastYear = async (position: ManagedPosition) => {
-  let dividendEvents: Record<
+  const dividendEvents: Record<
     string,
     {
       amount: number

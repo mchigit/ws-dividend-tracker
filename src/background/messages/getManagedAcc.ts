@@ -1,7 +1,9 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 
+import type { Position } from "~types"
 import { getCookie } from "~utils/cookie"
 import storage from "~utils/storage"
+import { getAllDividends } from "~utils/trade"
 import { WealthSimpleClient } from "~utils/wealthsimple"
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
@@ -45,40 +47,45 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       })
     )
 
+    const flattedPositions = allPositions.flat()
+
+    const allFormattedPositions: Position[] = flattedPositions
+      .map((positions) => {
+        return {
+          stock: {
+            symbol: positions.symbol,
+            name: positions.name,
+            primary_exchange: ""
+          },
+          quantity: parseFloat(positions.quantity),
+          account_id: positions.id,
+          currency: positions.currency,
+          type: positions.type
+        }
+      })
+      .filter((pos) => {
+        if (
+          pos.quantity === 0 ||
+          pos.type === "currency" ||
+          !pos?.stock?.symbol
+        ) {
+          return false
+        }
+
+        return true
+      })
+
+    const stockWithDiv = await getAllDividends(allFormattedPositions)
+
     await storage.set("getManagedAcc", {
-      allPositions,
+      allPositions: stockWithDiv,
       createdAt: new Date().getTime()
     })
 
     res.send({
-      allPositions,
+      allPositions: stockWithDiv,
       createdAt: new Date().getTime()
     })
-
-    // const allAcc = await wsClient.getAllAccountFiniancials()
-
-    // const tradePositions = await getTradePositions(accessToken)
-
-    // const formattedPositions = tradePositions.map((position: any) => {
-    //   return {
-    //     currency: position.currency,
-    //     stock: position.stock,
-    //     quantity: position.quantity,
-    //     account_id: position.account_id
-    //   }
-    // })
-
-    // const dividends = await getAllDividends(formattedPositions)
-
-    // await storage.set("tradePositionsWithDiv", {
-    //   activities,
-    //   createdAt: new Date().getTime()
-    // })
-
-    // res.send({
-    //   activities,
-    //   createdAt: new Date().getTime()
-    // })
   } catch (error) {
     console.error("Failed to handle", error)
     res.send({

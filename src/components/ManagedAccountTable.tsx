@@ -1,32 +1,30 @@
-import { Spinner } from "@material-tailwind/react"
-import { useQuery } from "@tanstack/react-query"
+import { v4 as uuidv4 } from "uuid"
 
 import type { ManagedPosition } from "~types"
-import { calculateManagedPositionDividends } from "~utils/managed"
+import { formatStockWithDiv } from "~utils/shared"
 
 export default function ManagedAccountTable(props: {
   managedPositions: ManagedPosition[]
 }) {
   const { managedPositions } = props
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["managedPositions", { managedPositions }],
-    queryFn: () => calculateManagedPositionDividends(managedPositions),
-    refetchOnWindowFocus: false
+  const positionWithDividends = formatStockWithDiv({
+    dividends: managedPositions
   })
 
-  const totalDividends = data
-    ? data.reduce((acc, pos) => acc + pos.totalDivPerYear, 0).toFixed(2)
+  const totalDividends = positionWithDividends
+    ? positionWithDividends
+        .reduce((acc, pos) => acc + pos.totalDividend, 0)
+        .toFixed(2)
     : 0
+
 
   return (
     <div className="flex items-center justify-center flex-col">
-      {isLoading && <Spinner className="w-8 h-8" />}
-      {data && (
+      {positionWithDividends && (
         <>
           <dl className="mx-auto grid grid-cols-1 gap-px bg-gray-900/5">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-2 bg-white px-4 py-6">
-              <dt className="text-lg font-medium leading-6 text-gray-500">
+            <div className="flex flex-col items-center gap-x-2 gap-y-2 bg-white px-4 py-6">
+              <dt className="text-lg text-center font-medium leading-6 text-gray-500">
                 Total Div / Year
               </dt>
               <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
@@ -50,7 +48,12 @@ export default function ManagedAccountTable(props: {
                 <th
                   scope="col"
                   className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Yearly Dividend
+                  Div Yield
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  Dividend
                 </th>
                 <th
                   scope="col"
@@ -60,22 +63,28 @@ export default function ManagedAccountTable(props: {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {data.map((position) => (
-                <tr key={position.id}>
-                  <td className="whitespace-nowrap text-start py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                    {position.symbol}
-                  </td>
-                  <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
-                    {position.quantity.toFixed(2)}
-                  </td>
-                  <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
-                    ${position.totalDivPerYear.toFixed(2)}
-                  </td>
-                  <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
-                    ${position.totalDivPerYearPerShare.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
+              {positionWithDividends.map((position) => {
+                const id = uuidv4()
+                return (
+                  <tr key={`${position.symbol}-${id}`}>
+                    <td className="whitespace-nowrap text-start py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                      {position.symbol}
+                    </td>
+                    <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
+                      {position.quantity.toFixed(2)}
+                    </td>
+                    <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
+                      {position.divYield.toFixed(2)}%
+                    </td>
+                    <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
+                      ${position.totalDividend.toFixed(2)}
+                    </td>
+                    <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
+                      ${position.totalDividendPerShare.toFixed(2)}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </>

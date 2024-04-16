@@ -17,6 +17,8 @@ function IndexPopup() {
   const [TradePositions, setTradePositions] = useState<Position[] | null>(null)
   const [ManagedAccData, setManagedAccData] = useState<any | null>(null)
 
+  console.log(ManagedAccData)
+
   const [isOldData, setIsOldData] = useState(false)
 
   const [loading, setLoading] = useState(true)
@@ -52,8 +54,7 @@ function IndexPopup() {
       })
 
       if (managedRes && managedRes?.allPositions) {
-        const allPositions = managedRes.allPositions as Array<Array<any>>
-        setManagedAccData(allPositions.flat())
+        setManagedAccData(managedRes.allPositions)
       }
 
       setLoading(false)
@@ -63,10 +64,10 @@ function IndexPopup() {
   }, [])
 
   return (
-    <div className="bg-white w-[400px] p-4">
+    <div className="bg-white w-[550px] p-4">
       <QueryClientProvider client={queryClient}>
         <div className="mx-auto text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+          <h2 className="text-xl font-bold tracking-wide my-2 text-gray-900 sm:text-4xl">
             WealthSimple Dividend Tracker
           </h2>
           <div className="p-8 w-full flex flex-col items-center justify-center">

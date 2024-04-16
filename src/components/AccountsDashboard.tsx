@@ -19,7 +19,7 @@ import { useState } from "react"
 
 import type { CashAccount, ManagedPosition, Position } from "~types"
 import { getYearlyTotal } from "~utils/graphql"
-import { calculateTotalDividends } from "~utils/shared"
+import { formatStockWithDiv } from "~utils/shared"
 
 import CashAccountTable from "./CashAccountTable"
 import TradeAccountTable from "./TradeAccountTable"
@@ -46,7 +46,8 @@ export default function AccountsDashboard(props: {
     setCurrentTab(tab)
   }
 
-  const positionWithDividends = calculateTotalDividends(props.tradePositions)
+  const positionWithDividends = formatStockWithDiv(props.tradePositions)
+
   const totalTradeDividends = positionWithDividends
     ? positionWithDividends.reduce((acc, pos) => acc + pos.totalDividend, 0)
     : 0

@@ -29,6 +29,7 @@ export type Position = {
   stock: Stock
   quantity: number
   account_id: string
+  type?: string
 }
 
 export type ManagedPosition = {

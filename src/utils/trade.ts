@@ -17,7 +17,7 @@ export const getTradePositions = async (accessToken: string) => {
 
 export const getYahooFinanceData = async (position: Position) => {
   let stockSymbol = position.stock.symbol
-  if (position.currency.toLowerCase() === "cad") {
+  if (position?.currency?.toLowerCase() === "cad") {
     stockSymbol += ".TO"
   }
 

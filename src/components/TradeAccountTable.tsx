@@ -1,12 +1,14 @@
+import { v4 as uuidv4 } from "uuid"
+
 import type { Position } from "~types"
-import { calculateTotalDividends } from "~utils/shared"
+import { formatStockWithDiv } from "~utils/shared"
 
 export default function TradeAccountTable(props: {
   tradePositions: Position[]
 }) {
   const { tradePositions } = props
 
-  const positionWithDividends = calculateTotalDividends(tradePositions)
+  const positionWithDividends = formatStockWithDiv(tradePositions)
 
   const totalDividends = positionWithDividends
     ? positionWithDividends
@@ -17,7 +19,7 @@ export default function TradeAccountTable(props: {
   return (
     <>
       <dl className="mx-auto grid grid-cols-1 gap-px bg-gray-900/5">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-2 bg-white px-4 py-6">
+        <div className="flex flex-col items-center gap-x-2 gap-y-2 bg-white px-4 py-6">
           <dt className="text-lg font-medium leading-6 text-gray-500">
             Total Div / Year
           </dt>
@@ -37,6 +39,16 @@ export default function TradeAccountTable(props: {
             <th
               scope="col"
               className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              Quantity
+            </th>
+            <th
+              scope="col"
+              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              Div Yield
+            </th>
+            <th
+              scope="col"
+              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
               Dividend
             </th>
             <th
@@ -47,19 +59,28 @@ export default function TradeAccountTable(props: {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 bg-white">
-          {positionWithDividends.map((position) => (
-            <tr key={position.symbol}>
-              <td className="whitespace-nowrap text-start py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                {position.symbol}
-              </td>
-              <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
-                ${position.totalDividend.toFixed(2)}
-              </td>
-              <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
-                ${position.totalDividendPerShare.toFixed(2)}
-              </td>
-            </tr>
-          ))}
+          {positionWithDividends.map((position) => {
+            const id = uuidv4()
+            return (
+              <tr key={`${position.symbol}-${id}`}>
+                <td className="whitespace-nowrap text-start py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                  {position.symbol}
+                </td>
+                <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
+                  {position.quantity.toFixed(2)}
+                </td>
+                <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
+                  {position.divYield.toFixed(2)}%
+                </td>
+                <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
+                  ${position.totalDividend.toFixed(2)}
+                </td>
+                <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
+                  ${position.totalDividendPerShare.toFixed(2)}
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </>
