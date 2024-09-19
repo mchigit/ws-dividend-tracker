@@ -22,7 +22,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       }
 
       res.send({
-        cookie: null
+        error: "No Cookie"
       })
       return
     }
