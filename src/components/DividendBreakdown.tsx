@@ -4,7 +4,6 @@ import {
   BarChart,
   CartesianGrid,
   Legend,
-  Rectangle,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -12,10 +11,8 @@ import {
 } from "recharts"
 
 import type {
-  CashAccount,
   CashAccountInterest,
   ManagedPosition,
-  Position
 } from "~types"
 
 const months = [
@@ -161,7 +158,7 @@ export default function DividendBreakdown(props: {
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
-      <h1 className="text-2xl my-8">Monthly Breakdown - {currentYear2Dig}</h1>
+      <h1 className="text-2xl my-6">Monthly Breakdown - {currentYear2Dig}</h1>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           width={500}

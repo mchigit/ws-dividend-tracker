@@ -56,7 +56,7 @@ export default function AccountsDashboard(props: {
     ? positionWithDividends.reduce((acc, pos) => acc + pos.totalDividend, 0)
     : 0
   const cashYearlyTotal = getYearlyTotal(
-    props.cashAccount.balance.withdrawalBalance / 100,
+    props.cashAccount.balance.spendingBalance / 100,
     parseFloat(props.cashAccount.interestRate.interestRate)
   )
 
@@ -64,9 +64,6 @@ export default function AccountsDashboard(props: {
 
   return (
     <div className="w-full">
-      {/* <h3 className="w-full text-lg font-semibold tracking-tight text-gray-900">
-        Yearly Dividends + Interest: ${totalDividends}
-      </h3> */}
       <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow">
         <dt className="my-2 text-sm font-medium text-gray-500">
           Yearly Dividend + Interest (Exc. Managed Account)

@@ -4,7 +4,7 @@ import { getYearlyTotal } from "~utils/graphql"
 export default function CashAccountTable(props: { cashAccount: CashAccount }) {
   const { cashAccount } = props
   const yearlyTotal = getYearlyTotal(
-    cashAccount.balance.withdrawalBalance / 100,
+    cashAccount.balance.spendingBalance / 100,
     parseFloat(cashAccount.interestRate.interestRate)
   )
 
@@ -13,7 +13,7 @@ export default function CashAccountTable(props: { cashAccount: CashAccount }) {
       <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-2 bg-white px-4 py-6">
         <dt className="text-lg font-medium leading-6 text-gray-500">Balance</dt>
         <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-          ${cashAccount.balance.withdrawalBalance / 100}
+          ${cashAccount.balance.spendingBalance / 100}
         </dd>
       </div>
       <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-2 bg-white px-4 py-6">
