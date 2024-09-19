@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react"
 import { sendToBackground } from "@plasmohq/messaging"
 
 import AccountsDashboard from "~components/AccountsDashboard"
-import { type CashAccount, type Position } from "~types"
+import { type CashAccount, type CashAccountInterest, type Position } from "~types"
 
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
 const queryClient = new QueryClient()
@@ -16,11 +16,9 @@ function IndexPopup() {
   const [CashAccount, setCashAccount] = useState<CashAccount | null>(null)
   const [TradePositions, setTradePositions] = useState<Position[] | null>(null)
   const [ManagedAccData, setManagedAccData] = useState<any | null>(null)
-
-  console.log(ManagedAccData)
+  const [cashInterests, setCashInterests] = useState<CashAccountInterest[] | null>(null)
 
   const [isOldData, setIsOldData] = useState(false)
-
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -57,6 +55,14 @@ function IndexPopup() {
         setManagedAccData(managedRes.allPositions)
       }
 
+      const cashInterests = await sendToBackground({
+        name: "getCashInterests"
+      })
+
+      if (cashInterests) {
+        setCashInterests(cashInterests.formattedCashInterests)
+      }
+
       setLoading(false)
     }
 
@@ -84,6 +90,7 @@ function IndexPopup() {
                   tradePositions={TradePositions}
                   cashAccount={CashAccount}
                   ManagedAccData={ManagedAccData}
+                  cashInterests={cashInterests}
                 />
               ) : (
                 !loading && (

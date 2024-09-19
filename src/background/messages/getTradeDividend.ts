@@ -8,9 +8,10 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log("Received a message from the content script:", req)
 
   try {
-    const storedTradePositionsWithDiv = await storage.get(
-      "tradePositionsWithDiv"
-    )
+    // const storedTradePositionsWithDiv = await storage.get(
+    //   "tradePositionsWithDiv"
+    // )
+    const storedTradePositionsWithDiv = null
     const cookie = await getCookie()
 
     if (!cookie) {

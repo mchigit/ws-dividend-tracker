@@ -48,3 +48,9 @@ export type ManagedPosition = {
   quantity: string
   __typename: string
 }
+
+export type CashAccountInterest = {
+  amount: string
+  occurredAt: string
+  currency: string
+}

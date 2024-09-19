@@ -13,22 +13,25 @@
   ```
 */
 import CashIcon from "data-base64:~assets/cashIcon.svg"
+import DetailIcon from "data-base64:~assets/details.svg"
 import ManagedIcon from "data-base64:~assets/managedIcon.png"
 import TradeIcon from "data-base64:~assets/tradeIcon.svg"
 import { useState } from "react"
 
-import type { CashAccount, ManagedPosition, Position } from "~types"
+import type { CashAccount, CashAccountInterest, ManagedPosition, Position } from "~types"
 import { getYearlyTotal } from "~utils/graphql"
 import { formatStockWithDiv } from "~utils/shared"
 
 import CashAccountTable from "./CashAccountTable"
-import TradeAccountTable from "./TradeAccountTable"
+import DividendBreakdown from "./DividendBreakdown"
 import ManagedAccountTable from "./ManagedAccountTable"
+import TradeAccountTable from "./TradeAccountTable"
 
 const tabs = [
   { name: "Cash", href: "#", icon: CashIcon },
   { name: "Trade", href: "#", icon: TradeIcon },
-  { name: "Managed", href: "#", icon: ManagedIcon }
+  { name: "Managed", href: "#", icon: ManagedIcon },
+  { name: "Details", href: "#", icon: DetailIcon }
 ]
 
 function classNames(...classes) {
@@ -39,6 +42,7 @@ export default function AccountsDashboard(props: {
   cashAccount: CashAccount
   tradePositions: Position[]
   ManagedAccData: ManagedPosition[]
+  cashInterests: CashAccountInterest[]
 }) {
   const [currentTab, setCurrentTab] = useState<string | null>("Cash")
 
@@ -108,6 +112,14 @@ export default function AccountsDashboard(props: {
         {currentTab === "Managed" && (
           <ManagedAccountTable managedPositions={props.ManagedAccData} />
         )}
+        {currentTab === "Details" && <div className="h-[500px]">
+          <DividendBreakdown 
+            tradePositions={props.tradePositions} 
+            managedPositions={props.ManagedAccData}
+            cashInterests={props.cashInterests}
+          />
+          </div>
+          }
       </div>
     </div>
   )
