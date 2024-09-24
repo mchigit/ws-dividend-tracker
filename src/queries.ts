@@ -22,6 +22,13 @@ const getRespFromBackground = async () => {
     }
   }
 
+  // console.log({
+  //   cashResp,
+  //   tradeResp,
+  //   managedRes,
+  //   cashInterests
+  // })
+
   if (!cashResp || !tradeResp || !managedRes || !cashInterests) {
     return {
       cashResp: null,
