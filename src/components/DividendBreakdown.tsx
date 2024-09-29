@@ -9,11 +9,9 @@ import {
   XAxis,
   YAxis
 } from "recharts"
+import { openDetailsTab } from "../details"
 
-import type {
-  CashAccountInterest,
-  ManagedPosition,
-} from "~types"
+import type { CashAccountInterest, ManagedPosition } from "~types"
 
 const months = [
   "Jan",
@@ -156,9 +154,17 @@ export default function DividendBreakdown(props: {
     }
   })
 
+
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
       <h1 className="text-2xl my-6">Monthly Breakdown - {currentYear2Dig}</h1>
+      <button
+        type="button"
+        className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        onClick={async () => await openDetailsTab()}
+        >
+        See Details
+      </button>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           width={500}

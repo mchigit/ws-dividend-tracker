@@ -60,3 +60,36 @@ export const calculateDivYieldForStock = (
 
   return divYield
 }
+
+export function generateTimestampNow(): string {
+  const now = new Date()
+  const year = now.getUTCFullYear()
+  const month = String(now.getUTCMonth() + 1).padStart(2, "0")
+  const day = String(now.getUTCDate()).padStart(2, "0")
+  const hours = String(now.getUTCHours()).padStart(2, "0")
+  const minutes = String(now.getUTCMinutes()).padStart(2, "0")
+  const seconds = String(now.getUTCSeconds()).padStart(2, "0")
+  const milliseconds = String(now.getUTCMilliseconds()).padStart(3, "0")
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}Z`
+}
+
+export const isInCurrentYear = (timestamp: string): boolean => {
+  const date = new Date(timestamp)
+  const currentYear = new Date().getFullYear()
+
+  return date.getFullYear() === currentYear
+}
+
+export function formatToLocalTime(timestamp: string) {
+  const date = new Date(timestamp)
+
+  // Format the date to local time using Intl.DateTimeFormat with the desired options
+  const formattedDate = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  }).format(date)
+
+  return formattedDate
+}

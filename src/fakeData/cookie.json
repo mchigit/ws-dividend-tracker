@@ -1,0 +1,24 @@
+{
+  "access_token": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJpZGVudGl0eS14c2VWNjJGZ0o4M3kwYk45bDFjSGxubHpSQSIsImV4cCI6MTcyNzQ3NDE0OSwiaWF0IjoxNzI3NDcyMzQ5LCJqdGkiOiIyQ2pLS0tMaUN6bHJxVVVQazZvZWI1RS0yUFNBTHNNMklYbTFkNEl3cHBFIiwiY2xpZW50X2lkIjoiNGRhNTNhYzJiMDMyMjViZWQxNTUwZWJhOGU0NjExZTA4NmM3YjkwNWEzODU1ZTZlZDEyZWEwOGMyNDY3NThmYSIsInNjb3BlIjoiaW52ZXN0LnJlYWQgaW52ZXN0LndyaXRlIHRyYWRlLnJlYWQgdHJhZGUud3JpdGUgdGF4LnJlYWQgdGF4LndyaXRlIn0.yaG4Pk9QAfiiRNv-i3-gnZrpEwOpKsgorIQ9hh5ukYoMhbwldA02EOKDOsWCQsGTrkqAhEwBoYYhDbtX-ZVinj2D_y70WyrYs0_UDulvLXL8GeyB0JIiDN_BL1As1gCOgAcaCS6v3ub0F9RyFRqO3wCprTKVjdMvI9qIsXy6Wnsnc2zczGXDZZY_zDkVOSTBA1pLOMc-D4Cgj01RW0a6DfQcSI5SNdZ5a8vB7w54y_mvDvlcY9Uyoj_bgzsyrAhoD4tj6WW9w2uXn8__bfJerKxeYZtFCA-fRETD7AyGutn855MEKtx09gUpFsSw37b0Bwn9kSBcK0wyfaCn3EfQFA",
+  "token_type": "Bearer",
+  "expires_in": 1800,
+  "refresh_token": "rIyxHc1bgEvCbC7epph5kSVMqR7FLZ7-jpMaUHZRzM8",
+  "scope": "invest.read invest.write trade.read trade.write tax.read tax.write",
+  "created_at": 1727472349,
+  "okta_group_claims": [],
+  "identity_canonical_id": "identity-xseV62FgJ83y0bN9l1cHlnlzRA",
+  "clock_skew": { "skewed": false },
+  "expires_at": "2024-09-27T21:55:49.000Z",
+  "email": "michael.chi1997@gmail.com",
+  "profiles": {
+    "tax": { "default": "user-nlwwsmtlq8t" },
+    "trade": { "default": "user-hgs2nvzugen" },
+    "invest": { "default": "user-qj5oytxcng4" }
+  },
+  "client_canonical_ids": {
+    "tax": { "default": "person-wne2bxd0yrva0g" },
+    "trade": { "default": "person-dhht6ypc_fwdka" },
+    "invest": { "default": "person-9-ofp7qoj210rg" }
+  },
+  "suspended_profiles": {}
+}

@@ -54,3 +54,25 @@ export type CashAccountInterest = {
   occurredAt: string
   currency: string
 }
+
+export interface FeedItem {
+  accountId: string
+  amount: number
+  currency: string
+  occurredAt: string
+  type: string
+  unifiedAccountType: string
+  assetSymbol: string
+  canonicalId: string
+  securityId: string
+}
+
+export interface Account {
+  id: string
+  currency: string
+  nickname: string
+  status: string
+  type: string
+  financials: any // Adjust type if you have more specific financials structure
+  unifiedAccountType: string
+}

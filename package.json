@@ -11,7 +11,8 @@
     "lint": "eslint 'src/**/*.{ts,tsx}' --fix"
   },
   "dependencies": {
-    "@heroicons/react": "^2.1.1",
+    "@headlessui/react": "^2.1.8",
+    "@heroicons/react": "^2.1.5",
     "@material-tailwind/react": "^2.1.8",
     "@plasmohq/messaging": "^0.6.2",
     "@plasmohq/storage": "^1.9.1",
@@ -30,6 +31,7 @@
     "@types/node": "20.11.5",
     "@types/react": "18.2.42",
     "@types/react-dom": "18.2.18",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9.0.0",
     "globals": "^15.0.0",
     "postcss": "8.4.33",

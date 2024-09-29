@@ -2,6 +2,10 @@ import { useQuery } from "@tanstack/react-query"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
+import { getCookie } from "~utils/cookie"
+import { getAllAccountFiniancials, getAllDivItems } from "~utils/graphql"
+import { formatAllAccFiniancialData } from "~utils/wealthsimple"
+
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
 
 const getRespFromBackground = async () => {
@@ -61,4 +65,45 @@ export const useFetchRespFromBgQuery = () =>
   useQuery({
     queryKey: ["fetchRespFromBg"],
     queryFn: getRespFromBackground
+  })
+
+const fetchDivDetails = async () => {
+  const cookies = await getCookie()
+
+  if (!cookies) {
+    return null
+  }
+
+  const decodedCookie = decodeURIComponent(cookies.value)
+  const parsedCookie = JSON.parse(decodedCookie)
+
+  const idenitityId = parsedCookie.identity_canonical_id
+  const accessToken = parsedCookie.access_token
+
+  const allAccFiniancials = await getAllAccountFiniancials(
+    accessToken,
+    idenitityId
+  )
+
+  const formattedAccts = formatAllAccFiniancialData(allAccFiniancials)
+  const openAccs = formattedAccts.filter(
+    (acct) => acct.status?.toLowerCase() === "open"
+  )
+  const accountsData = openAccs.map((acct) => {
+    return {
+      accountId: acct.id,
+      type: acct.type,
+      unifiedAccountType: acct.unifiedAccountType
+    }
+  })
+
+  const allDivActivities = await getAllDivItems(accessToken, accountsData)
+
+  return allDivActivities
+}
+
+export const useFetchDivDetailsQuery = () =>
+  useQuery({
+    queryKey: ["fetchDivDetails"],
+    queryFn: fetchDivDetails
   })
