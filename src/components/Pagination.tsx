@@ -49,7 +49,7 @@ export function CircularPagination(props: {
         variant="text"
         className="flex items-center gap-2 rounded-full"
         onClick={next}
-        disabled={activePage === 5}>
+        disabled={activePage === maxPages}>
         Next
         <ArrowRightIcon strokeWidth={2} className="h-4 w-4" />
       </Button>

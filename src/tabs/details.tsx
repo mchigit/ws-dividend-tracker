@@ -45,16 +45,16 @@ function WsDividendDetails() {
         <h1 className="text-3xl font-bold">Year to date</h1>
         {data && (
           <>
-            <h2 className="text-lg mt-4">Total: ${getTotalAmount(data, true)}</h2>
+            <h2 className="text-lg mt-4">Total: ${getTotalAmount(data.feedItems, true)}</h2>
             <div className="w-full h-[500px] my-8">
-              <DivBarChart data={data} />{" "}
+              <DivBarChart data={data.feedItems} />{" "}
             </div>
           </>
         )}
         <h1 className="text-3xl font-bold mt-10">History</h1>
         {data && (
           <div className="w-full flex items-center flex-col">
-            <DivHistory data={data} />
+            <DivHistory data={data.feedItems} />
           </div>
         )}
       </div>

@@ -1,9 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
 
+// import {} from 'idb'
+
 import { sendToBackground } from "@plasmohq/messaging"
 
 import { getCookie } from "~utils/cookie"
 import { getAllAccountFiniancials, getAllDivItems } from "~utils/graphql"
+import { getFeedItems, writeToFeedDB } from "~utils/idb"
 import { formatAllAccFiniancialData } from "~utils/wealthsimple"
 
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
@@ -25,13 +28,6 @@ const getRespFromBackground = async () => {
       isOldData = true
     }
   }
-
-  // console.log({
-  //   cashResp,
-  //   tradeResp,
-  //   managedRes,
-  //   cashInterests
-  // })
 
   if (!cashResp || !tradeResp || !managedRes || !cashInterests) {
     return {
@@ -68,10 +64,19 @@ export const useFetchRespFromBgQuery = () =>
   })
 
 const fetchDivDetails = async () => {
+  const feedInDB = await getFeedItems()
   const cookies = await getCookie()
 
   if (!cookies) {
+    if (feedInDB) {
+      return feedInDB
+    }
+
     return null
+  }
+
+  if (feedInDB && !feedInDB.isOldData) {
+    return feedInDB
   }
 
   const decodedCookie = decodeURIComponent(cookies.value)
@@ -99,11 +104,17 @@ const fetchDivDetails = async () => {
 
   const allDivActivities = await getAllDivItems(accessToken, accountsData)
 
-  return allDivActivities
+  await writeToFeedDB(allDivActivities)
+
+  return {
+    feedItems: allDivActivities,
+    isOldData: false
+  }
 }
 
 export const useFetchDivDetailsQuery = () =>
   useQuery({
     queryKey: ["fetchDivDetails"],
-    queryFn: fetchDivDetails
+    queryFn: fetchDivDetails,
+    refetchOnWindowFocus: false
   })
