@@ -320,7 +320,8 @@ export async function getAllDivItems(
     accountId: string
     type: string
     unifiedAccountType: string
-  }>
+  }>,
+  lastFeedItem?: FeedItem
 ): Promise<Array<FeedItem>> {
   const allAccIds = accountIds.map((acc) => acc.accountId)
 
@@ -343,6 +344,24 @@ export async function getAllDivItems(
 
   let nextCursor = json.data.activityFeedItems.pageInfo.endCursor
 
+  if (lastFeedItem) {
+    const feedInData = formattedData.find((item) => {
+      return (
+        item.canonicalId.includes(lastFeedItem.canonicalId) &&
+        item.accountId === lastFeedItem.accountId
+      )
+    })
+
+    if (feedInData) {
+      const feedInDataIndex = formattedData.indexOf(feedInData)
+      formattedData.splice(
+        feedInDataIndex,
+        formattedData.length - feedInDataIndex
+      )
+      nextCursor = null
+    }
+  }
+
   while (nextCursor) {
     const newQLBody = buildFeedItemQL(allAccIds, nextCursor)
     const newRes = await fetch("https://my.wealthsimple.com/graphql", {
@@ -363,6 +382,24 @@ export async function getAllDivItems(
     formattedData.push(...newFormattedData)
 
     nextCursor = newJson?.data?.activityFeedItems?.pageInfo?.endCursor
+
+    if (lastFeedItem) {
+      const feedInData = formattedData.find((item) => {
+        return (
+          item.canonicalId.includes(lastFeedItem.canonicalId) &&
+          item.accountId === lastFeedItem.accountId
+        )
+      })
+
+      if (feedInData) {
+        const feedInDataIndex = formattedData.indexOf(feedInData)
+        formattedData.splice(
+          feedInDataIndex,
+          formattedData.length - feedInDataIndex
+        )
+        nextCursor = null
+      }
+    }
   }
 
   const formattedFeedItemWithUnifiedAccType = formattedData.map((item) => {

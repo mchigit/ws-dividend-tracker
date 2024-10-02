@@ -4,9 +4,10 @@ import { useQuery } from "@tanstack/react-query"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
+import type { FeedItem } from "~types"
 import { getCookie } from "~utils/cookie"
 import { getAllAccountFiniancials, getAllDivItems } from "~utils/graphql"
-import { getFeedItems, writeToFeedDB } from "~utils/idb"
+import { getFeedItems, syncDivTransactionInDB, writeDataToDB } from "~utils/idb"
 import { formatAllAccFiniancialData } from "~utils/wealthsimple"
 
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
@@ -63,8 +64,13 @@ export const useFetchRespFromBgQuery = () =>
     queryFn: getRespFromBackground
   })
 
-const fetchDivDetails = async () => {
+const fetchDivDetails = async (): Promise<{
+  feedItems: FeedItem[]
+  isOldData?: boolean
+  needLogin?: boolean
+}> => {
   const feedInDB = await getFeedItems()
+  // const feedInDB = null
   const cookies = await getCookie()
 
   if (!cookies) {
@@ -72,11 +78,11 @@ const fetchDivDetails = async () => {
       return feedInDB
     }
 
-    return null
-  }
-
-  if (feedInDB && !feedInDB.isOldData) {
-    return feedInDB
+    return {
+      feedItems: [],
+      isOldData: false,
+      needLogin: true
+    }
   }
 
   const decodedCookie = decodeURIComponent(cookies.value)
@@ -84,6 +90,21 @@ const fetchDivDetails = async () => {
 
   const idenitityId = parsedCookie.identity_canonical_id
   const accessToken = parsedCookie.access_token
+
+  if (feedInDB && !feedInDB.isOldData) {
+    return {
+      feedItems: feedInDB.feedItems,
+      isOldData: false
+    }
+  } else if (feedInDB && feedInDB.isOldData) {
+    await syncDivTransactionInDB(accessToken)
+
+    const allDivActivities = await getFeedItems()
+    return {
+      feedItems: allDivActivities.feedItems,
+      isOldData: false
+    }
+  }
 
   const allAccFiniancials = await getAllAccountFiniancials(
     accessToken,
@@ -104,7 +125,7 @@ const fetchDivDetails = async () => {
 
   const allDivActivities = await getAllDivItems(accessToken, accountsData)
 
-  await writeToFeedDB(allDivActivities)
+  await writeDataToDB(allDivActivities, formattedAccts)
 
   return {
     feedItems: allDivActivities,
