@@ -7,7 +7,12 @@ import { sendToBackground } from "@plasmohq/messaging"
 import type { FeedItem } from "~types"
 import { getCookie } from "~utils/cookie"
 import { getAllAccountFiniancials, getAllDivItems } from "~utils/graphql"
-import { getFeedItems, syncDivTransactionInDB, writeDataToDB } from "~utils/idb"
+import {
+  getFeedItems,
+  getFilterValsFromDB,
+  syncDivTransactionInDB,
+  writeDataToDB
+} from "~utils/idb"
 import { formatAllAccFiniancialData } from "~utils/wealthsimple"
 
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
@@ -91,19 +96,10 @@ const fetchDivDetails = async (): Promise<{
   const idenitityId = parsedCookie.identity_canonical_id
   const accessToken = parsedCookie.access_token
 
-  if (feedInDB && !feedInDB.isOldData) {
-    return {
-      feedItems: feedInDB.feedItems,
-      isOldData: false
-    }
-  } else if (feedInDB && feedInDB.isOldData) {
-    await syncDivTransactionInDB(accessToken)
+  await syncDivTransactionInDB(accessToken)
 
-    const allDivActivities = await getFeedItems()
-    return {
-      feedItems: allDivActivities.feedItems,
-      isOldData: false
-    }
+  if (feedInDB && !feedInDB.isOldData) {
+    return feedInDB
   }
 
   const allAccFiniancials = await getAllAccountFiniancials(
@@ -136,6 +132,13 @@ const fetchDivDetails = async (): Promise<{
 export const useFetchDivDetailsQuery = () =>
   useQuery({
     queryKey: ["fetchDivDetails"],
-    queryFn: fetchDivDetails,
+    queryFn: () => fetchDivDetails(),
+    refetchOnWindowFocus: false
+  })
+
+export const useFetchFilterValsQuery = () =>
+  useQuery({
+    queryKey: ["filterVals"],
+    queryFn: getFilterValsFromDB,
     refetchOnWindowFocus: false
   })

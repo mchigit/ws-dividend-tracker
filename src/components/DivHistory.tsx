@@ -1,38 +1,24 @@
-import React from "react"
+import React, { useEffect } from "react"
 
 import type { FeedItem } from "~types"
-import { formatToLocalTime } from "~utils/shared"
+import { formatToLocalTime, getAccountName } from "~utils/shared"
 
 import { CircularPagination } from "./Pagination"
+// import DivHistoryTable from "./DivHistoryTable"
 
-function getAccountName(accountId: string, unifiedAccountType: string) {
-  if (accountId.includes("tfsa")) {
-    if (unifiedAccountType.includes("managed")) {
-      return "TFSA (Managed)"
-    }
-
-    return "TFSA (Self Directed)"
-  } else if (accountId.includes("rrsp")) {
-    if (unifiedAccountType.includes("managed")) {
-      return "RRSP (Managed)"
-    }
-
-    return "RRSP (Self Directed)"
-  } else if (accountId.includes("cash")) {
-    return "Cash"
-  } else {
-    return "Self Directed"
-  }
-}
-
-const PAGE_SIZE = 15
+const PAGE_SIZE = 10
 
 export default function DivHistory(props: { data: FeedItem[] }) {
   const { data } = props
   const [page, setPage] = React.useState(1)
+//   const [curSort, setCurSort] = React.useState<string>("date")
 
   const slicedData = data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const maxPage = Math.ceil(data.length / PAGE_SIZE)
+
+  useEffect(() => {
+    setPage(1)
+  }, [data])
 
   return (
     <>
@@ -98,6 +84,7 @@ export default function DivHistory(props: { data: FeedItem[] }) {
           ))}
         </tbody>
       </table>
+      {/* <DivHistoryTable feedItems={slicedData} currentSort={curSort} setSortBy={setCurSort} /> */}
       <CircularPagination
         activePage={page}
         maxPages={maxPage}

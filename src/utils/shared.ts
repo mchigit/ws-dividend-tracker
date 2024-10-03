@@ -93,3 +93,35 @@ export function formatToLocalTime(timestamp: string) {
 
   return formattedDate
 }
+export function getAccountName(accountId: string, unifiedAccountType: string) {
+  if (accountId.includes("tfsa")) {
+    if (unifiedAccountType.toLowerCase().includes("managed")) {
+      return "TFSA (Managed)"
+    }
+
+    return "TFSA (Self Directed)"
+  } else if (accountId.includes("rrsp")) {
+    if (unifiedAccountType.toLowerCase().includes("managed")) {
+      return "RRSP (Managed)"
+    }
+
+    return "RRSP (Self Directed)"
+  } else if (accountId.includes("cash")) {
+    return "Cash"
+  } else {
+    return "Self Directed"
+  }
+}
+
+export const HISTORY_FILTERS = {
+  BY_ACCOUNT: "BY_ACCOUNT",
+  BY_ASSET: "BY_ASSET",
+  BY_TYPE: "BY_TYPE",
+  BY_ACC_TYPE: "BY_ACC_TYPE"
+}
+
+export const ACC_TYPES = {
+  CASH: "Cash",
+  SELF_DIRECTED: "Self Directed",
+  MANAGED: "Managed"
+}

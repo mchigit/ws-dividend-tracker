@@ -104,7 +104,6 @@ const CustomTooltip = ({
   label
 }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
-
     const totalDiv = payload.reduce((acc, item) => {
       return acc + parseFloat(item.value)
     }, 0)
@@ -127,8 +126,9 @@ const CustomTooltip = ({
 export default function DivBarChart(props: {
   data: FeedItem[]
   byAccType?: boolean
+  stackedGraph?: boolean
 }) {
-  const { data } = props
+  const { data, stackedGraph } = props
 
   const allData = transformDataForGraph(data)
 
@@ -152,19 +152,19 @@ export default function DivBarChart(props: {
         <Bar
           dataKey="Cash Interest"
           fill="#323030"
-          stackId="a"
+          stackId={stackedGraph ? "a" : undefined}
           // activeBar={<Rectangle fill="pink" stroke="blue" />}
         />
         <Bar
           dataKey="Self Directed Dividends"
           fill="#78b2b2"
-          stackId="a"
+          stackId={stackedGraph ? "a" : undefined}
           // activeBar={<Rectangle fill="blue" stroke="blue" />}
         />
         <Bar
           dataKey="Managed Dividends"
           fill="#f7c359"
-          stackId="a"
+          stackId={stackedGraph ? "a" : undefined}
           // activeBar={<Rectangle fill="blue" stroke="blue" />}
         />
       </BarChart>

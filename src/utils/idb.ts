@@ -111,3 +111,37 @@ export async function syncDivTransactionInDB(accessToken: string) {
 
   await db.lastSynced.put(lastSynced)
 }
+
+export async function getFilterValsFromDB() {
+  const accounts = await db.userAccounts.toArray()
+
+  const feedItems = await db.feedItems.toArray()
+  const uniqueSymbols = Array.from(
+    new Set(feedItems.map((symbol) => symbol.assetSymbol))
+  )
+
+  const feedAccounts = feedItems
+    .map((item) => {
+      const acc = accounts.find((account) => account.id === item.accountId)
+      if (acc) {
+        return {
+          id: acc.id,
+          type: acc.type,
+          unifiedAccountType: acc.unifiedAccountType
+        }
+      }
+
+      return null
+    })
+    .filter(Boolean)
+
+  const temp = new Set()
+  const uniqueAccs = feedAccounts.filter(
+    ({ id }) => !temp.has(id) && temp.add(id)
+  )
+
+  return {
+    uniqueAccs: uniqueAccs,
+    symbols: uniqueSymbols
+  }
+}
