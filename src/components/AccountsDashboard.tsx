@@ -20,7 +20,6 @@ import { useState } from "react"
 
 import type {
   CashAccount,
-  CashAccountInterest,
   ManagedPosition,
   Position
 } from "~types"
@@ -28,7 +27,6 @@ import { getYearlyTotal } from "~utils/graphql"
 import { formatStockWithDiv } from "~utils/shared"
 
 import CashAccountTable from "./CashAccountTable"
-import DividendBreakdown from "./DividendBreakdown"
 import ManagedAccountTable from "./ManagedAccountTable"
 import TradeAccountTable from "./TradeAccountTable"
 import { openDetailsTab } from "~details"
@@ -48,7 +46,6 @@ export default function AccountsDashboard(props: {
   cashAccount: CashAccount
   tradePositions: Position[]
   ManagedAccData: ManagedPosition[]
-  cashInterests: CashAccountInterest[]
 }) {
   const [currentTab, setCurrentTab] = useState<string | null>("Cash")
 
@@ -72,7 +69,7 @@ export default function AccountsDashboard(props: {
     <div className="w-full">
       <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow">
         <dt className="my-2 text-sm font-medium text-gray-500">
-          Yearly Dividend + Interest (Exc. Managed Account)
+          Yearly Dividend + Interest
         </dt>
         <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
           ${totalDividends}
@@ -121,15 +118,6 @@ export default function AccountsDashboard(props: {
         )}
         {currentTab === "Managed" && (
           <ManagedAccountTable managedPositions={props.ManagedAccData} />
-        )}
-        {currentTab === "Details" && (
-          <div className="h-[500px]">
-            <DividendBreakdown
-              tradePositions={props.tradePositions}
-              managedPositions={props.ManagedAccData}
-              cashInterests={props.cashInterests}
-            />
-          </div>
         )}
       </div>
     </div>

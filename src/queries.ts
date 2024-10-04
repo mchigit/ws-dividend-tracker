@@ -18,11 +18,10 @@ import { formatAllAccFiniancialData } from "~utils/wealthsimple"
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
 
 const getRespFromBackground = async () => {
-  const [cashResp, tradeResp, managedRes, cashInterests] = await Promise.all([
+  const [cashResp, tradeResp, managedRes] = await Promise.all([
     sendToBackground({ name: "getCashDiv" }),
     sendToBackground({ name: "getTradeDividend" }),
-    sendToBackground({ name: "getManagedAcc" }),
-    sendToBackground({ name: "getCashInterests" })
+    sendToBackground({ name: "getManagedAcc" })
   ])
 
   let isOldData = false
@@ -35,32 +34,25 @@ const getRespFromBackground = async () => {
     }
   }
 
-  if (!cashResp || !tradeResp || !managedRes || !cashInterests) {
+  if (!cashResp || !tradeResp || !managedRes) {
     return {
       cashResp: null,
       tradeResp: null,
       managedRes: null,
-      cashInterests: null,
       isOldData
     }
   }
 
-  if (
-    cashResp?.error ||
-    tradeResp?.error ||
-    managedRes?.error ||
-    cashInterests?.error
-  ) {
+  if (cashResp?.error || tradeResp?.error || managedRes?.error) {
     return {
       cashResp: null,
       tradeResp: null,
       managedRes: null,
-      cashInterests: null,
       isOldData
     }
   }
 
-  return { cashResp, tradeResp, managedRes, cashInterests, isOldData }
+  return { cashResp, tradeResp, managedRes, isOldData }
 }
 
 export const useFetchRespFromBgQuery = () =>

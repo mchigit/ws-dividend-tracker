@@ -4,7 +4,6 @@ import { Alert, Spinner } from "@material-tailwind/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import React from "react"
 
-
 import AccountsDashboard from "~components/AccountsDashboard"
 import { useFetchRespFromBgQuery } from "~queries"
 
@@ -13,8 +12,7 @@ const queryClient = new QueryClient()
 function PopupComponet() {
   const { data, isLoading } = useFetchRespFromBgQuery()
 
-  const { cashResp, tradeResp, managedRes, cashInterests } =
-    data || {}
+  const { cashResp, tradeResp, managedRes } = data || {}
 
   return (
     <div className="mx-auto text-center">
@@ -30,17 +28,18 @@ function PopupComponet() {
               refresh.
             </Alert>
           )}
-          {tradeResp && cashResp && managedRes && cashInterests ? (
+          {tradeResp && cashResp && managedRes ? (
             <AccountsDashboard
               tradePositions={tradeResp}
               cashAccount={cashResp}
               ManagedAccData={managedRes.allPositions}
-              cashInterests={cashInterests.formattedCashInterests}
             />
           ) : (
-            !isLoading && <Alert className="rounded-none border-l-4 border-[#FBC361] bg-[#FBC361]/10 font-medium text-blue-gray-900">
-              Please login to WealthSimple
-            </Alert>
+            !isLoading && (
+              <Alert className="rounded-none border-l-4 border-[#FBC361] bg-[#FBC361]/10 font-medium text-blue-gray-900">
+                Please login to WealthSimple
+              </Alert>
+            )
           )}
         </div>
       </div>
