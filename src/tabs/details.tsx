@@ -143,24 +143,30 @@ function FilterByAccTypeDropdown(props: {
     value: key
   }))
 
+  allAccTypes.unshift({ label: "All", value: "all" })
+
   return (
     <div className="flex flex-col gap-y-2 w-full">
       <label className="text-lg font-semibold">Filter by Account Type</label>
       <Select
-        closeMenuOnSelect={false}
         defaultValue={allAccTypes.filter((item) =>
           activeFilter[HISTORY_FILTERS.BY_ACC_TYPE]?.includes(item.value)
         )}
-        isMulti={true}
+        closeMenuOnSelect={true}
         name="Filter By Account Type"
         options={allAccTypes as any}
         placeholder="Select Account Type"
         onChange={(selected) => {
+          if (selected.value === "all") {
+            setActiveFilter({
+              ...activeFilter,
+              [HISTORY_FILTERS.BY_ACC_TYPE]: []
+            })
+            return
+          }
           setActiveFilter({
             ...activeFilter,
-            [HISTORY_FILTERS.BY_ACC_TYPE]: selected.map(
-              (item: any) => item.value
-            )
+            [HISTORY_FILTERS.BY_ACC_TYPE]: [selected.value]
           })
         }}
         isClearable={false}
@@ -180,10 +186,7 @@ function filterFeedItems(
   activeFilters: Record<string, string[]>
 ): FeedItem[] {
   let filteredFeedItems = data
-
-  // console.log(activeFilters)
-  // console.log(filteredFeedItems)
-
+  
   if (activeFilters) {
     if (activeFilters[HISTORY_FILTERS.BY_ACCOUNT]?.length > 0) {
       filteredFeedItems = filteredFeedItems.filter((item) =>
@@ -199,8 +202,8 @@ function filterFeedItems(
 
     if (activeFilters[HISTORY_FILTERS.BY_ACC_TYPE]?.length > 0) {
       filteredFeedItems = filteredFeedItems.filter((item) => {
-        return activeFilters[HISTORY_FILTERS.BY_ACC_TYPE].some((x) =>
-          item.unifiedAccountType.toLowerCase().includes(x.toLowerCase())
+        return item.unifiedAccountType.toLowerCase().includes(
+          activeFilters[HISTORY_FILTERS.BY_ACC_TYPE][0].toLowerCase()
         )
       })
     }
@@ -216,7 +219,8 @@ function WsDividendDetails() {
   )
 
   const { data, isLoading } = useFetchDivDetailsQuery()
-  const { data: filterData } = useFetchFilterValsQuery()
+  const { data: filterData, isLoading: filterDataLoading } =
+    useFetchFilterValsQuery()
 
   const filteredFeedItems = filterFeedItems(
     data?.feedItems || [],
@@ -286,12 +290,22 @@ function WsDividendDetails() {
                   <FilterByAccTypeDropdown
                     activeFilter={activeFilters}
                     setActiveFilter={setActiveFilters}
-                    dataItems={data.feedItems}
                   />
                 </>
               )}
             </div>
-            {filteredFeedItems.length > 0 && filterData && (
+            {!isLoading &&
+              !filterDataLoading &&
+              filteredFeedItems.length === 0 && (
+                <div className="overflow-hidden rounded-lg bg-gray-200 !w-[500px]">
+                  <div className="px-4 py-5 sm:p-6 flex items-center justify-center w-full">
+                    <p className="text-md">
+                      No data found for the selected filters.
+                    </p>
+                  </div>
+                </div>
+              )}
+            {filteredFeedItems.length > 0 && (
               <DivHistory data={filteredFeedItems} />
             )}
           </div>
