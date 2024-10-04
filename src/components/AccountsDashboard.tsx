@@ -59,7 +59,7 @@ export default function AccountsDashboard(props: {
     ? positionWithDividends.reduce((acc, pos) => acc + pos.totalDividend, 0)
     : 0
   const cashYearlyTotal = getYearlyTotal(
-    props.cashAccount.balance.spendingBalance / 100,
+    props.cashAccount.balance.cents / 100,
     parseFloat(props.cashAccount.interestRate.interestRate)
   )
 

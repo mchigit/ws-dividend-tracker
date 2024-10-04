@@ -1,8 +1,7 @@
 export interface Balance {
-  id: string
-  spendingBalance: number
-  pendingBalance: number
-  withdrawalBalance: number
+  amount: string
+  currency: string
+  cents: number
   __typename: string // You may want to replace this with a more specific type if possible
 }
 

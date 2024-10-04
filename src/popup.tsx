@@ -14,6 +14,12 @@ function PopupComponet() {
 
   const { cashResp, tradeResp, managedRes } = data || {}
 
+  console.log({
+    cashResp,
+    tradeResp,
+    managedRes
+  })
+
   return (
     <div className="mx-auto text-center">
       <h2 className="text-xl font-bold tracking-wide my-2 text-gray-900 sm:text-4xl">
