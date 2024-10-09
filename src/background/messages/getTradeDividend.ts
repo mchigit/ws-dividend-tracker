@@ -38,14 +38,26 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
 
     const tradePositions = await getTradePositions(accessToken)
 
-    const formattedPositions = tradePositions.map((position: any) => {
-      return {
-        currency: position.currency,
-        stock: position.stock,
-        quantity: position.quantity,
-        account_id: position.account_id
+    const formattedPositions: Array<any> = tradePositions.map(
+      (position: any) => {
+        return {
+          currency: position.currency,
+          stock: position.stock,
+          quantity: position.quantity,
+          account_id: position.account_id
+        }
       }
-    })
+    )
+
+    // formattedPositions.push({
+    //   currency: "CAD",
+    //   stock: {
+    //     symbol: "SRU.UN",
+    //     name: "SmartCentres REIT"
+    //   },
+    //   quantity: 1,
+    //   account_id: "rrsp-vfkjrmn6"
+    // })
 
     const dividends = await getAllDividends(formattedPositions)
 

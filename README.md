@@ -2,7 +2,12 @@ This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies:
+```
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 pnpm dev
@@ -24,6 +29,11 @@ Run the following:
 pnpm build
 # or
 npm run build
+```
+
+For Firefox:
+```
+npm run build:firefox
 ```
 
 This should create a production bundle for your extension, ready to be zipped and published to the stores.

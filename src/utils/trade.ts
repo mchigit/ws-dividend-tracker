@@ -1,5 +1,7 @@
 import type { Position } from "~types"
 
+import { getYahooAutoComplete } from "./yahoo"
+
 export const getTradePositions = async (accessToken: string) => {
   const response = await fetch(
     "https://trade-service.wealthsimple.com/account/positions",
@@ -17,18 +19,20 @@ export const getTradePositions = async (accessToken: string) => {
 
 export const getYahooFinanceData = async (position: Position) => {
   let stockSymbol = position.stock.symbol
-  if (position?.currency?.toLowerCase() === "cad") {
-    stockSymbol += ".TO"
+  const stockName = position.stock.name
+
+  let autoCompleteRes = await getYahooAutoComplete(stockSymbol)
+  if (autoCompleteRes.quotes.length === 0) {
+    autoCompleteRes = await getYahooAutoComplete(stockName)
   }
 
+  if (autoCompleteRes.quotes.length === 0) {
+    return
+  }
+
+  stockSymbol = autoCompleteRes.quotes[0].symbol
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}?events=div&interval=1d&range=1y`
-  let yahooResp = await fetch(url)
-
-  if (yahooResp.status === 404) {
-    stockSymbol = stockSymbol.replace(".TO", "")
-    const newUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}?events=div&interval=1d&range=1y`
-    yahooResp = await fetch(newUrl)
-  }
+  const yahooResp = await fetch(url)
 
   if (yahooResp.ok) {
     const data = await yahooResp.json()
@@ -41,6 +45,10 @@ export const getAllDividends = async (positions: Position[]) => {
     positions.map(async (position) => {
       const stockData = await getYahooFinanceData(position)
 
+      if (!stockData) {
+        return
+      }
+
       return {
         quantity: position.quantity,
         stockData
@@ -48,5 +56,5 @@ export const getAllDividends = async (positions: Position[]) => {
     })
   )
 
-  return allStockData
+  return allStockData.filter(Boolean)
 }
