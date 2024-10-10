@@ -2,6 +2,11 @@ import queryString from "query-string"
 
 const YAHOO_BASE = "https://query1.finance.yahoo.com"
 
+export const YAHOO_SYMBOL_MAPS = {
+  QQC: "QQC.TO",
+  "QQC.F": "QQC-F.TO"
+}
+
 export const getYahooAutoComplete = async (query: string) => {
   const queryParam = queryString.stringify({
     q: query,

@@ -1,6 +1,6 @@
 import type { Position } from "~types"
 
-import { getYahooAutoComplete } from "./yahoo"
+import { getYahooAutoComplete, YAHOO_SYMBOL_MAPS } from "./yahoo"
 
 export const getTradePositions = async (accessToken: string) => {
   const response = await fetch(
@@ -19,18 +19,24 @@ export const getTradePositions = async (accessToken: string) => {
 
 export const getYahooFinanceData = async (position: Position) => {
   let stockSymbol = position.stock.symbol
-  const stockName = position.stock.name
 
-  let autoCompleteRes = await getYahooAutoComplete(stockSymbol)
-  if (autoCompleteRes.quotes.length === 0) {
-    autoCompleteRes = await getYahooAutoComplete(stockName)
+  if (stockSymbol in YAHOO_SYMBOL_MAPS) {
+    stockSymbol = YAHOO_SYMBOL_MAPS[stockSymbol]
+  } else {
+    const stockName = position.stock.name
+
+    let autoCompleteRes = await getYahooAutoComplete(stockSymbol)
+    if (autoCompleteRes.quotes.length === 0) {
+      autoCompleteRes = await getYahooAutoComplete(stockName)
+    }
+
+    if (autoCompleteRes.quotes.length === 0) {
+      return
+    }
+
+    stockSymbol = autoCompleteRes.quotes[0].symbol
   }
 
-  if (autoCompleteRes.quotes.length === 0) {
-    return
-  }
-
-  stockSymbol = autoCompleteRes.quotes[0].symbol
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}?events=div&interval=1d&range=1y`
   const yahooResp = await fetch(url)
 
