@@ -33,7 +33,7 @@ import { openDetailsTab } from "~details"
 
 const tabs = [
   { name: "Cash", href: "#", icon: CashIcon },
-  { name: "Trade", href: "#", icon: TradeIcon },
+  { name: "Self-Directed", href: "#", icon: TradeIcon },
   { name: "Managed", href: "#", icon: ManagedIcon },
   { name: "Details", href: "#", icon: openNewTab }
 ]
