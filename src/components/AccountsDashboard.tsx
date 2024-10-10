@@ -113,7 +113,7 @@ export default function AccountsDashboard(props: {
         {currentTab === "Cash" && (
           <CashAccountTable cashAccount={props.cashAccount} />
         )}
-        {currentTab === "Trade" && (
+        {currentTab === "Self-Directed" && (
           <TradeAccountTable tradePositions={props.tradePositions} />
         )}
         {currentTab === "Managed" && (
