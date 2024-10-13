@@ -13,23 +13,19 @@
   ```
 */
 import CashIcon from "data-base64:~assets/cashIcon.svg"
-import openNewTab from "data-base64:~assets/openNewTab.svg"
 import ManagedIcon from "data-base64:~assets/managedIcon.png"
+import openNewTab from "data-base64:~assets/openNewTab.svg"
 import TradeIcon from "data-base64:~assets/tradeIcon.svg"
 import { useState } from "react"
 
-import type {
-  CashAccount,
-  ManagedPosition,
-  Position
-} from "~types"
+import { openDetailsTab } from "~details"
+import type { CashAccount, ManagedPosition, Position } from "~types"
 import { getYearlyTotal } from "~utils/graphql"
 import { formatStockWithDiv } from "~utils/shared"
 
 import CashAccountTable from "./CashAccountTable"
 import ManagedAccountTable from "./ManagedAccountTable"
 import TradeAccountTable from "./TradeAccountTable"
-import { openDetailsTab } from "~details"
 
 const tabs = [
   { name: "Cash", href: "#", icon: CashIcon },
@@ -54,16 +50,26 @@ export default function AccountsDashboard(props: {
   }
 
   const positionWithDividends = formatStockWithDiv(props.tradePositions)
+  const managedPosWithDiv = formatStockWithDiv(props.ManagedAccData)
 
   const totalTradeDividends = positionWithDividends
     ? positionWithDividends.reduce((acc, pos) => acc + pos.totalDividend, 0)
     : 0
+
+  const totalManagedDividends = managedPosWithDiv
+    ? managedPosWithDiv.reduce((acc, pos) => acc + pos.totalDividend, 0)
+    : 0
+
   const cashYearlyTotal = getYearlyTotal(
     props.cashAccount.balance.cents / 100,
     parseFloat(props.cashAccount.interestRate.interestRate)
   )
 
-  const totalDividends = (totalTradeDividends + cashYearlyTotal).toFixed(2)
+  const totalDividends = (
+    totalTradeDividends +
+    cashYearlyTotal +
+    totalManagedDividends
+  ).toFixed(2)
 
   return (
     <div className="w-full">
@@ -86,7 +92,6 @@ export default function AccountsDashboard(props: {
                 } else {
                   setCurrentTabHandler(tab.name)
                 }
-         
               }}
               className={classNames(
                 currentTab === tab.name

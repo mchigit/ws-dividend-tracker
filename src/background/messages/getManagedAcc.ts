@@ -91,12 +91,12 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     const stockWithDiv = await getAllDividends(allFormattedPositions)
 
     await storage.set("getManagedAcc", {
-      allPositions: stockWithDiv,
+      dividends: stockWithDiv,
       createdAt: new Date().getTime()
     })
 
     res.send({
-      allPositions: stockWithDiv,
+      dividends: stockWithDiv,
       createdAt: new Date().getTime()
     })
   } catch (error) {

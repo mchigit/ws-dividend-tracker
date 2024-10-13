@@ -7,9 +7,7 @@ export default function ManagedAccountTable(props: {
   managedPositions: ManagedPosition[]
 }) {
   const { managedPositions } = props
-  const positionWithDividends = formatStockWithDiv({
-    dividends: managedPositions
-  })
+  const positionWithDividends = formatStockWithDiv(managedPositions)
 
   const totalDividends = positionWithDividends
     ? positionWithDividends

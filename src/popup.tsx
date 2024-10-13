@@ -14,9 +14,9 @@ function PopupComponet() {
 
   const { cashResp, tradeResp, managedRes } = data || {}
 
-  // console.log({
-  //   data
-  // })
+  console.log({
+    data
+  })
 
   return (
     <div className="mx-auto text-center">
@@ -36,7 +36,7 @@ function PopupComponet() {
             <AccountsDashboard
               tradePositions={tradeResp}
               cashAccount={cashResp}
-              ManagedAccData={managedRes.allPositions}
+              ManagedAccData={managedRes}
             />
           ) : (
             !isLoading && (
