@@ -2,15 +2,20 @@ import type { PlasmoMessaging } from "@plasmohq/messaging"
 
 import type { Position } from "~types"
 import { getCookie } from "~utils/cookie"
+import {
+  getAllAccountFiniancials,
+  getManagedAccountPositions
+} from "~utils/graphql"
 import storage from "~utils/storage"
 import { getAllDividends } from "~utils/trade"
-import { WealthSimpleClient } from "~utils/wealthsimple"
+import { formatAllAccFiniancialData } from "~utils/wealthsimple"
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log("Received a message from the content script:", req)
 
   try {
     const storedManagedAcc = await storage.get("getManagedAcc")
+    // const storedManagedAcc = null
     const cookie = await getCookie()
 
     if (!cookie) {
@@ -33,17 +38,25 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       }
     }
 
-    const wsClient = new WealthSimpleClient(cookie.value)
+    // const allAccFiniancials = await wsClient.getAllAccountFiniancials()
+    const decodedAuthCookie = JSON.parse(decodeURIComponent(cookie.value))
+    const accessToken = decodedAuthCookie.access_token
+    const identityId = decodedAuthCookie.identity_canonical_id
 
-    const allAccFiniancials = await wsClient.getAllAccountFiniancials()
+    const allAccFiniancials = await getAllAccountFiniancials(
+      accessToken,
+      identityId
+    )
+    const formattedAccFiniancials =
+      formatAllAccFiniancialData(allAccFiniancials)
 
-    const managedAccs = allAccFiniancials.filter((acc) =>
-      acc.unifiedAccountType.includes("MANAGED")
+    const managedAccs = formattedAccFiniancials.filter((acc) =>
+      acc.unifiedAccountType.toLowerCase().includes("managed")
     )
 
     const allPositions = await Promise.all(
       managedAccs.map(async (acc) => {
-        return await wsClient.getManagedAccountPositions(acc.id)
+        return await getManagedAccountPositions(accessToken, acc.id)
       })
     )
 

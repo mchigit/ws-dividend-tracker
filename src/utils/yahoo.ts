@@ -4,7 +4,12 @@ const YAHOO_BASE = "https://query1.finance.yahoo.com"
 
 export const YAHOO_SYMBOL_MAPS = {
   QQC: "QQC.TO",
-  "QQC.F": "QQC-F.TO"
+  "QQC.F": "QQC-F.TO",
+  ZEA: "ZEA.TO"
+}
+
+export const EXCHANGE_MAP = {
+  TSX: "TOR"
 }
 
 export const getYahooAutoComplete = async (query: string) => {

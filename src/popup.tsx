@@ -14,11 +14,9 @@ function PopupComponet() {
 
   const { cashResp, tradeResp, managedRes } = data || {}
 
-  console.log({
-    cashResp,
-    tradeResp,
-    managedRes
-  })
+  // console.log({
+  //   data
+  // })
 
   return (
     <div className="mx-auto text-center">
@@ -28,7 +26,7 @@ function PopupComponet() {
       <div className="p-8 w-full flex flex-col items-center justify-center">
         {isLoading && <Spinner className="h-12 w-12" />}
         <div className="w-full">
-          {data?.isOldData && (
+          {data?.isOldData === true && (
             <Alert className="rounded-none border-l-4 border-[#FBC361] bg-[#FBC361]/10 font-medium text-blue-gray-900 text-sm text-left mb-2">
               Your data is potentially outdated. Please login to WealthSimple to
               refresh.

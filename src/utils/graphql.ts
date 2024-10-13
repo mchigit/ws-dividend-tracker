@@ -3,6 +3,8 @@ import type { FeedItem } from "~types"
 import { generateTimestampNow } from "./shared"
 import { formatFeedItemResp } from "./wealthsimple"
 
+const WS_GRAPHQL_URL = "https://my.wealthsimple.com/graphql"
+
 export function getYearlyTotal(balance: number, interestRate: number) {
   return balance * interestRate
 }
@@ -20,7 +22,7 @@ export async function getCashAccountInterestRate(
       "query FetchAccountInterestRate($accountId: ID!) {\n  account(id: $accountId) {\n    ...AccountInterestRate\n    __typename\n  }\n}\n\nfragment AccountInterestRate on Account {\n  id\n  interestRate: interest_rate\n  interestRateBoosted\n  __typename\n}"
   }
 
-  const res = await fetch("https://my.wealthsimple.com/graphql", {
+  const res = await fetch(WS_GRAPHQL_URL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -49,7 +51,7 @@ export async function getDividendActivities(accessToken: string) {
       "query FetchAccountInterestRate($accountId: ID!) {\n  account(id: $accountId) {\n    ...AccountInterestRate\n    __typename\n  }\n}\n\nfragment AccountInterestRate on Account {\n  id\n  interestRate: interest_rate\n  interestRateBoosted\n  __typename\n}"
   }
 
-  const res = await fetch("https://my.wealthsimple.com/graphql", {
+  const res = await fetch(WS_GRAPHQL_URL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -79,7 +81,7 @@ export async function getAllAccountFiniancials(
       "query FetchAllAccountFinancials($identityId: ID!, $startDate: Date, $pageSize: Int = 25, $cursor: String) {\n  identity(id: $identityId) {\n    id\n    ...AllAccountFinancials\n    __typename\n  }\n}\n\nfragment AllAccountFinancials on Identity {\n  accounts(filter: {}, first: $pageSize, after: $cursor) {\n    pageInfo {\n      hasNextPage\n      endCursor\n      __typename\n    }\n    edges {\n      cursor\n      node {\n        ...AccountWithFinancials\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment AccountWithFinancials on Account {\n  ...AccountWithLink\n  ...AccountFinancials\n  __typename\n}\n\nfragment AccountWithLink on Account {\n  ...Account\n  linkedAccount {\n    ...Account\n    __typename\n  }\n  __typename\n}\n\nfragment Account on Account {\n  ...AccountCore\n  custodianAccounts {\n    ...CustodianAccount\n    __typename\n  }\n  __typename\n}\n\nfragment AccountCore on Account {\n  id\n  archivedAt\n  branch\n  closedAt\n  createdAt\n  cacheExpiredAt\n  currency\n  requiredIdentityVerification\n  unifiedAccountType\n  supportedCurrencies\n  nickname\n  status\n  accountOwnerConfiguration\n  accountFeatures {\n    ...AccountFeature\n    __typename\n  }\n  accountOwners {\n    ...AccountOwner\n    __typename\n  }\n  type\n  __typename\n}\n\nfragment AccountFeature on AccountFeature {\n  name\n  enabled\n  __typename\n}\n\nfragment AccountOwner on AccountOwner {\n  accountId\n  identityId\n  accountNickname\n  clientCanonicalId\n  accountOpeningAgreementsSigned\n  name\n  email\n  ownershipType\n  activeInvitation {\n    ...AccountOwnerInvitation\n    __typename\n  }\n  sentInvitations {\n    ...AccountOwnerInvitation\n    __typename\n  }\n  __typename\n}\n\nfragment AccountOwnerInvitation on AccountOwnerInvitation {\n  id\n  createdAt\n  inviteeName\n  inviteeEmail\n  inviterName\n  inviterEmail\n  updatedAt\n  sentAt\n  status\n  __typename\n}\n\nfragment CustodianAccount on CustodianAccount {\n  id\n  branch\n  custodian\n  status\n  updatedAt\n  __typename\n}\n\nfragment AccountFinancials on Account {\n  id\n  custodianAccounts {\n    id\n    financials {\n      current {\n        ...CustodianAccountCurrentFinancialValues\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  financials {\n    currentCombined {\n      ...AccountCurrentFinancials\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment CustodianAccountCurrentFinancialValues on CustodianAccountCurrentFinancialValues {\n  deposits {\n    ...Money\n    __typename\n  }\n  earnings {\n    ...Money\n    __typename\n  }\n  netDeposits {\n    ...Money\n    __typename\n  }\n  netLiquidationValue {\n    ...Money\n    __typename\n  }\n  withdrawals {\n    ...Money\n    __typename\n  }\n  __typename\n}\n\nfragment Money on Money {\n  amount\n  cents\n  currency\n  __typename\n}\n\nfragment AccountCurrentFinancials on AccountCurrentFinancials {\n  netLiquidationValue {\n    ...Money\n    __typename\n  }\n  netDeposits {\n    ...Money\n    __typename\n  }\n  simpleReturns(referenceDate: $startDate) {\n    ...SimpleReturns\n    __typename\n  }\n  totalDeposits {\n    ...Money\n    __typename\n  }\n  totalWithdrawals {\n    ...Money\n    __typename\n  }\n  __typename\n}\n\nfragment SimpleReturns on SimpleReturns {\n  amount {\n    ...Money\n    __typename\n  }\n  asOf\n  rate\n  referenceDate\n  __typename\n}"
   }
 
-  const res = await fetch("https://my.wealthsimple.com/graphql", {
+  const res = await fetch(WS_GRAPHQL_URL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -126,7 +128,7 @@ export async function getAllDivItems(
 
   const divQLBody = buildFeedItemQL(allAccIds)
 
-  const res = await fetch("https://my.wealthsimple.com/graphql", {
+  const res = await fetch(WS_GRAPHQL_URL, {
     method: "POST",
     body: JSON.stringify(divQLBody),
     headers: {
@@ -163,7 +165,7 @@ export async function getAllDivItems(
 
   while (nextCursor) {
     const newQLBody = buildFeedItemQL(allAccIds, nextCursor)
-    const newRes = await fetch("https://my.wealthsimple.com/graphql", {
+    const newRes = await fetch(WS_GRAPHQL_URL, {
       method: "POST",
       body: JSON.stringify(newQLBody),
       headers: {
@@ -211,4 +213,35 @@ export async function getAllDivItems(
   })
 
   return formattedFeedItemWithUnifiedAccType
+}
+
+export async function getManagedAccountPositions(
+  token: string,
+  accountId: string
+) {
+  const data = {
+    operationName: "FetchAccountManagedPortfolioPositions",
+    variables: {
+      accountId: accountId
+    },
+    query:
+      "query FetchAccountManagedPortfolioPositions($accountId: ID!) {\n  account(id: $accountId) {\n    id\n    positions {\n      ...ManagedPortfolioPosition\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment ManagedPortfolioPosition on Position {\n  id\n  allocation\n  className: class_name\n  currency\n  description\n  fee\n  name\n  performance\n  symbol\n  type\n  value\n  category\n  quantity\n  __typename\n}"
+  }
+
+  const res = await fetch(WS_GRAPHQL_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "X-Ws-Api-Version": "12",
+      "X-Ws-Profile": "invest",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(data)
+  })
+
+  if (res.ok) {
+    const json = await res.json()
+
+    return json?.data?.account?.positions
+  }
 }

@@ -11,6 +11,9 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     const storedTradePositionsWithDiv = await storage.get(
       "tradePositionsWithDiv"
     )
+
+    // const storedTradePositionsWithDiv = null
+
     const cookie = await getCookie()
 
     if (!cookie) {
@@ -38,16 +41,18 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
 
     const tradePositions = await getTradePositions(accessToken)
 
-    const formattedPositions: Array<any> = tradePositions.map(
-      (position: any) => {
-        return {
-          currency: position.currency,
-          stock: position.stock,
-          quantity: position.quantity,
-          account_id: position.account_id
+    const formattedPositions: Array<any> = tradePositions
+      .map((position: any) => {
+        if (position.active) {
+          return {
+            currency: position.currency,
+            stock: position.stock,
+            quantity: position.quantity,
+            account_id: position.account_id
+          }
         }
-      }
-    )
+      })
+      .filter(Boolean)
 
     // formattedPositions.push({
     //   currency: "CAD",

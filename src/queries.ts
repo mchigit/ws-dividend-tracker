@@ -39,7 +39,7 @@ const getRespFromBackground = async () => {
       cashResp: null,
       tradeResp: null,
       managedRes: null,
-      isOldData
+      isOldData: undefined
     }
   }
 
@@ -48,7 +48,7 @@ const getRespFromBackground = async () => {
       cashResp: null,
       tradeResp: null,
       managedRes: null,
-      isOldData
+      isOldData: undefined
     }
   }
 
