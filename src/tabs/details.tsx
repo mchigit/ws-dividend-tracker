@@ -11,7 +11,7 @@ import DivHistory from "~components/DivHistory"
 import Header from "~components/Header"
 import NeedLoginBanner from "~components/NeedLoginBanner"
 import OldDataBanner from "~components/OldDataBanner"
-import { useFetchDivDetailsQuery, useFetchFilterValsQuery } from "~queries"
+import { useFetchDivDetailsQuery } from "~queries"
 import type { FeedItem } from "~types"
 import { ACC_TYPES, getAccountName, HISTORY_FILTERS } from "~utils/shared"
 
@@ -219,8 +219,6 @@ function WsDividendDetails() {
   )
 
   const { data, isLoading } = useFetchDivDetailsQuery()
-  const { data: filterData, isLoading: filterDataLoading } =
-    useFetchFilterValsQuery()
 
   const filteredFeedItems = filterFeedItems(
     data?.feedItems || [],
@@ -275,17 +273,17 @@ function WsDividendDetails() {
           <h1 className="text-3xl font-bold mt-10">History</h1>
           <div className="w-full flex items-center justify-start flex-col">
             <div className="grid grid-cols-3 gap-6 w-full my-8">
-              {filterData && (
+              {data?.filterValues && (
                 <>
                   <FilterBySymbolDropdown
                     activeFilter={activeFilters}
                     setActiveFilter={setActiveFilters}
-                    symbols={filterData.symbols}
+                    symbols={data.filterValues.symbols}
                   />
                   <FilterByAccDropdown
                     activeFilter={activeFilters}
                     setActiveFilter={setActiveFilters}
-                    uniqueAccs={filterData.uniqueAccs}
+                    uniqueAccs={data.filterValues.uniqueAccs}
                   />
                   <FilterByAccTypeDropdown
                     activeFilter={activeFilters}
@@ -295,7 +293,6 @@ function WsDividendDetails() {
               )}
             </div>
             {!isLoading &&
-              !filterDataLoading &&
               filteredFeedItems.length === 0 && (
                 <div className="overflow-hidden rounded-lg bg-gray-200 !w-[500px]">
                   <div className="px-4 py-5 sm:p-6 flex items-center justify-center w-full">

@@ -36,3 +36,16 @@ export const getYahooAutoComplete = async (query: string) => {
 
   return res.json()
 }
+
+export const getPastDividends = async (symbol: string) => {
+  const url = `${YAHOO_BASE}/v8/finance/chart/${symbol}?events=div&interval=1d&range=5y`
+  const res = await fetch(url)
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch past dividends from Yahoo")
+  }
+
+  const json = await res.json()
+
+  return json.chart.result[0]
+}

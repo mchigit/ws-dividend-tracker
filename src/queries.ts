@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
-import type { FeedItem } from "~types"
+import type { FeedItem, FilterValues } from "~types"
 import { getCookie } from "~utils/cookie"
 import { getAllAccountFiniancials, getAllDivItems } from "~utils/graphql"
 import {
@@ -65,6 +65,7 @@ const fetchDivDetails = async (): Promise<{
   feedItems: FeedItem[]
   isOldData?: boolean
   needLogin?: boolean
+  filterValues?: FilterValues
 }> => {
   const feedInDB = await getFeedItems()
   // const feedInDB = null
@@ -72,7 +73,11 @@ const fetchDivDetails = async (): Promise<{
 
   if (!cookies) {
     if (feedInDB) {
-      return feedInDB
+      const filterValues = await getFilterValsFromDB()
+      return {
+        ...feedInDB,
+        filterValues
+      }
     }
 
     return {
@@ -91,7 +96,11 @@ const fetchDivDetails = async (): Promise<{
   await syncDivTransactionInDB(accessToken)
 
   if (feedInDB && !feedInDB.isOldData) {
-    return feedInDB
+    const filterValues = await getFilterValsFromDB()
+    return {
+      ...feedInDB,
+      filterValues
+    }
   }
 
   const allAccFiniancials = await getAllAccountFiniancials(
@@ -115,8 +124,11 @@ const fetchDivDetails = async (): Promise<{
 
   await writeDataToDB(allDivActivities, formattedAccts)
 
+  const filterValues = await getFilterValsFromDB()
+
   return {
     feedItems: allDivActivities,
+    filterValues,
     isOldData: false
   }
 }
@@ -128,9 +140,10 @@ export const useFetchDivDetailsQuery = () =>
     refetchOnWindowFocus: false
   })
 
-export const useFetchFilterValsQuery = () =>
-  useQuery({
-    queryKey: ["filterVals"],
-    queryFn: getFilterValsFromDB,
-    refetchOnWindowFocus: false
-  })
+// const fetchAllHoldings = async () => {
+
+// }
+
+// export const useFetchAllHoldingsQuery = () => {
+
+// }

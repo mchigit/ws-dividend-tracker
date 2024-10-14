@@ -75,3 +75,12 @@ export interface Account {
   financials: any // Adjust type if you have more specific financials structure
   unifiedAccountType: string
 }
+
+export type FilterValues = {
+  uniqueAccs: Array<{
+    id: string
+    type: string
+    unifiedAccountType: string
+  }>
+  symbols: string[]
+}

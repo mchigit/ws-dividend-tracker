@@ -1,6 +1,6 @@
 import Dexie, { type EntityTable } from "dexie"
 
-import type { Account, FeedItem } from "~types"
+import type { Account, FeedItem, FilterValues } from "~types"
 
 import { getAllDivItems } from "./graphql"
 
@@ -112,7 +112,7 @@ export async function syncDivTransactionInDB(accessToken: string) {
   await db.lastSynced.put(lastSynced)
 }
 
-export async function getFilterValsFromDB() {
+export async function getFilterValsFromDB(): Promise<FilterValues> {
   const accounts = await db.userAccounts.toArray()
 
   const feedItems = await db.feedItems.toArray()
