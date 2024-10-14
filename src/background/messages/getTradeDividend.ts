@@ -41,7 +41,19 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
 
     const tradePositions = await getTradePositions(accessToken)
 
-    const formattedPositions: Array<any> = tradePositions
+    const filteredTradePositions = tradePositions.filter((pos) => {
+      if (pos?.security_type === "options") {
+        return false
+      }
+
+      if (pos?.active === false) {
+        return false
+      }
+
+      return true
+    })
+
+    const formattedPositions: Array<any> = filteredTradePositions
       .map((position: any) => {
         if (position.active) {
           return {
