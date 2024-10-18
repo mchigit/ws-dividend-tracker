@@ -5,7 +5,8 @@ const YAHOO_BASE = "https://query1.finance.yahoo.com"
 export const YAHOO_SYMBOL_MAPS = {
   QQC: "QQC.TO",
   "QQC.F": "QQC-F.TO",
-  ZEA: "ZEA.TO"
+  ZEA: "ZEA.TO",
+  CASH: "CASH.TO"
 }
 
 export const EXCHANGE_MAP = {

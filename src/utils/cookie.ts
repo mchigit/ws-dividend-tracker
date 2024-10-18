@@ -6,5 +6,27 @@ const cookieDetail = {
 export async function getCookie() {
   const cookie = await chrome.cookies.get(cookieDetail)
 
-  return cookie
+  if (cookie) {
+    const parsedCookie = JSON.parse(decodeURIComponent(cookie.value))
+
+    const token = parsedCookie.access_token
+    const tryGetPos = await fetch(
+      "https://trade-service.wealthsimple.com/account/positions",
+      {
+        headers: {
+          authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    if (tryGetPos.status === 401) {
+      return null
+    }
+
+    if (tryGetPos.ok) {
+      return cookie
+    }
+  }
+
+  return null
 }
