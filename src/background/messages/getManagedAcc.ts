@@ -73,7 +73,8 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
           quantity: parseFloat(positions.quantity),
           account_id: positions.id,
           currency: positions.currency,
-          type: positions.type
+          type: positions.type,
+          sec_id: positions.id
         }
       })
       .filter((pos) => {
@@ -88,7 +89,10 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
         return true
       })
 
-    const stockWithDiv = await getAllDividends(allFormattedPositions)
+    const stockWithDiv = await getAllDividends(
+      allFormattedPositions,
+      accessToken
+    )
 
     await storage.set("getManagedAcc", {
       dividends: stockWithDiv,

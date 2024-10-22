@@ -215,6 +215,33 @@ export async function getAllDivItems(
   return formattedFeedItemWithUnifiedAccType
 }
 
+async function searchWSSecurity(token: string, symbol: string) {
+  const data = {
+    operationName: "FetchHwsSecuritySearchResult",
+    variables: {
+      query: symbol
+    },
+    query:
+      "query FetchHwsSecuritySearchResult($query: String!) {\n  hwsSecuritySearch(input: {query: $query}) {\n    results {\n      ...HwsSecuritySearchResult\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment HwsSecuritySearchResult on HwsSecuritySearchResult {\n  id\n  buyable\n  status\n  stock {\n    symbol\n    name\n    primaryExchange\n    __typename\n  }\n  __typename\n}"
+  }
+
+  const res = await fetch(WS_GRAPHQL_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "X-Ws-Api-Version": "12",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(data)
+  })
+
+  if (res.ok) {
+    const json = await res.json()
+
+    return json?.data?.hwsSecuritySearch?.results
+  }
+}
+
 export async function getManagedAccountPositions(
   token: string,
   accountId: string
@@ -242,6 +269,53 @@ export async function getManagedAccountPositions(
   if (res.ok) {
     const json = await res.json()
 
-    return json?.data?.account?.positions
+    // Search WS GraphQL for the actual security
+
+    const positions = json?.data?.account?.positions
+    if (!positions) return null
+
+    const positionsWithSecId = await Promise.all(
+      positions.map(async (position) => {
+        const searchRes = await searchWSSecurity(token, position.symbol)
+        if (!searchRes) return null
+
+        const secId = searchRes[0].id
+
+        return {
+          ...position,
+          id: secId
+        }
+      })
+    )
+
+    return positionsWithSecId.filter(Boolean)
   }
+}
+
+export async function getWSSecurityFundamentals(
+  accessToken: string,
+  securityId: string
+) {
+  const data = {
+    operationName: "FetchSecurityMarketData",
+    variables: {
+      id: securityId
+    },
+    query:
+      "query FetchSecurityMarketData($id: ID!) {\n  security(id: $id) {\n    id\n    ...SecurityMarketData\n    __typename\n  }\n}\n\nfragment SecurityMarketData on Security {\n  id\n  allowedOrderSubtypes\n  marginRates {\n    ...MarginRates\n    __typename\n  }\n  fundamentals {\n    avgVolume\n    high52Week\n    low52Week\n    yield\n    peRatio\n    marketCap\n    currency\n    description\n    __typename\n  }\n  quote {\n    bid\n    ask\n    open\n    high\n    low\n    volume\n    askSize\n    bidSize\n    last\n    lastSize\n    quotedAsOf\n    quoteDate\n    amount\n    previousClose\n    __typename\n  }\n  stock {\n    primaryExchange\n    primaryMic\n    name\n    symbol\n    __typename\n  }\n  __typename\n}\n\nfragment MarginRates on MarginRates {\n  clientMarginRate\n  __typename\n}"
+  }
+
+  const res = await fetch(WS_GRAPHQL_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "X-Ws-Api-Version": "12",
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify(data)
+  })
+
+  const json = await res.json()
+
+  return json
 }

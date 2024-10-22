@@ -42,15 +42,18 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     const tradePositions = await getTradePositions(accessToken)
 
     const filteredTradePositions = tradePositions.filter((pos) => {
-      if (pos?.security_type === "options") {
+      if (
+        pos?.security_type === "option" ||
+        pos?.active === false ||
+        pos?.quantity === 0
+      ) {
         return false
       }
 
-      if (pos?.active === false) {
-        return false
-      }
-
-      return true
+      return (
+        pos?.security_type === "equity" ||
+        pos?.security_type === "exchange_traded_fund"
+      )
     })
 
     const formattedPositions: Array<any> = filteredTradePositions
@@ -60,12 +63,12 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
             currency: position.currency,
             stock: position.stock,
             quantity: position.quantity,
-            account_id: position.account_id
+            account_id: position.account_id,
+            sec_id: position.id
           }
         }
       })
       .filter(Boolean)
-
     // formattedPositions.push({
     //   currency: "CAD",
     //   stock: {
@@ -76,7 +79,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     //   account_id: "rrsp-vfkjrmn6"
     // })
 
-    const dividends = await getAllDividends(formattedPositions)
+    const dividends = await getAllDividends(formattedPositions, accessToken)
 
     await storage.set("tradePositionsWithDiv", {
       dividends,

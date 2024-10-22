@@ -97,7 +97,7 @@ export const formatStockWithDiv = (
       }
 
       const currentPrice = stockData.regularMarketPrice
-      const divYield = parseFloat(stockData.dividendYield.replace("%", ""))
+      const divYield = stockData.dividendYield
       const quantity = div.quantity
       const totalDividend = (divYield / 100) * currentPrice * quantity
       const totalDividendPerShare = (divYield / 100) * currentPrice

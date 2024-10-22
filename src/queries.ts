@@ -140,7 +140,12 @@ export const useFetchDivDetailsQuery = () =>
     refetchOnWindowFocus: false
   })
 
-// const fetchAllHoldings = async () => {
+// const fetchAllHoldings = async (accessToken: string) => {
+//   const allAccounts = await getAccountInfoFromDB()
+
+//   if (!allAccounts || allAccounts.length === 0) {
+//     return null
+//   }
 
 // }
 
