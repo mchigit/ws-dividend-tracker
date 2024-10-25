@@ -1,12 +1,16 @@
+import { ChevronDownIcon } from "@heroicons/react/20/solid"
+import { useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 
 import type { ManagedPosition } from "~types"
-import { formatStockWithDiv } from "~utils/shared"
+import { formatStockWithDiv, sortTable } from "~utils/shared"
 
 export default function ManagedAccountTable(props: {
   managedPositions: ManagedPosition[]
 }) {
   const { managedPositions } = props
+  const [currentSort, setCurrentSort] = useState<string>("symbol")
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
   const positionWithDividends = formatStockWithDiv(managedPositions)
 
   const totalDividends = positionWithDividends
@@ -15,6 +19,11 @@ export default function ManagedAccountTable(props: {
         .toFixed(2)
     : 0
 
+  const sortedPositions = sortTable(
+    positionWithDividends,
+    currentSort,
+    sortDirection
+  )
 
   return (
     <div className="flex items-center justify-center flex-col">
@@ -36,32 +45,72 @@ export default function ManagedAccountTable(props: {
                 <th
                   scope="col"
                   className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                  Symbol
+                  <button
+                    onClick={() => {
+                      setCurrentSort("symbol")
+                      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+                    }}
+                    className="group inline-flex">
+                    Symbol
+                    <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
+                      <ChevronDownIcon aria-hidden="true" className="h-5 w-5" />
+                    </span>
+                  </button>
                 </th>
                 <th
                   scope="col"
                   className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Quantity
+                  <button
+                    onClick={() => {
+                      setCurrentSort("quantity")
+                      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+                    }}
+                    className="group inline-flex">
+                    Quantity
+                    <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
+                      <ChevronDownIcon aria-hidden="true" className="h-5 w-5" />
+                    </span>
+                  </button>
                 </th>
                 <th
                   scope="col"
                   className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Div Yield
+                  <button
+                    onClick={() => {
+                      setCurrentSort("divYield")
+                      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+                    }}
+                    className="group inline-flex">
+                    Div Yield
+                    <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
+                      <ChevronDownIcon aria-hidden="true" className="h-5 w-5" />
+                    </span>
+                  </button>
                 </th>
                 <th
                   scope="col"
                   className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Dividend
+                  <button
+                    onClick={() => {
+                      setCurrentSort("dividend")
+                      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+                    }}
+                    className="group inline-flex">
+                    Dividend
+                    <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
+                      <ChevronDownIcon aria-hidden="true" className="h-5 w-5" />
+                    </span>
+                  </button>
                 </th>
-                <th
-                  scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Div / Share
-                </th>
+                {/* <th
+              scope="col"
+              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              Div / Share
+            </th> */}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {positionWithDividends.map((position) => {
+              {sortedPositions.map((position) => {
                 const id = uuidv4()
                 return (
                   <tr key={`${position.symbol}-${id}`}>
@@ -76,9 +125,6 @@ export default function ManagedAccountTable(props: {
                     </td>
                     <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
                       ${position.totalDividend.toFixed(2)}
-                    </td>
-                    <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
-                      ${position.totalDividendPerShare.toFixed(2)}
                     </td>
                   </tr>
                 )

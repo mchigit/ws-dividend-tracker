@@ -187,3 +187,49 @@ export const ACC_TYPES = {
   SELF_DIRECTED: "Self Directed",
   MANAGED: "Managed"
 }
+
+export function sortTable(
+  positions: FormattedStockWithDiv[],
+  sortBy: string,
+  direction: "asc" | "desc"
+) {
+  switch (sortBy) {
+    case "symbol":
+      return positions.sort((a, b) => {
+        if (direction === "asc") {
+          return a.symbol.localeCompare(b.symbol)
+        }
+        return b.symbol.localeCompare(a.symbol)
+      })
+    case "quantity":
+      return positions.sort((a, b) => {
+        if (direction === "asc") {
+          return a.quantity - b.quantity
+        }
+        return b.quantity - a.quantity
+      })
+    case "divYield":
+      return positions.sort((a, b) => {
+        if (direction === "asc") {
+          return a.divYield - b.divYield
+        }
+        return b.divYield - a.divYield
+      })
+    case "dividend":
+      return positions.sort((a, b) => {
+        if (direction === "asc") {
+          return a.totalDividend - b.totalDividend
+        }
+        return b.totalDividend - a.totalDividend
+      })
+    case "divPerShare":
+      return positions.sort((a, b) => {
+        if (direction === "asc") {
+          return a.totalDividendPerShare - b.totalDividendPerShare
+        }
+        return b.totalDividendPerShare - a.totalDividendPerShare
+      })
+    default:
+      return positions
+  }
+}
