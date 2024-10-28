@@ -6,38 +6,6 @@ export type FormattedStockWithDiv = {
   quantity: number
 }
 
-// export const getDivFrequency = (
-//   dividendEvents: Record<
-//     string,
-//     {
-//       amount: number
-//       date: number
-//     }
-//   >
-// ): number => {
-//   const lastYear: number = new Date().getFullYear() - 1
-//   const dividendsLastYear = []
-
-//   Object.keys(dividendEvents).forEach((div) => {
-//     const event = dividendEvents[div]
-//     const eventDate = new Date(event.date * 1000)
-
-//     if (eventDate.getFullYear() === lastYear) {
-//       dividendsLastYear.push(event)
-//     }
-//   })
-
-//   if (dividendsLastYear.length === 2 || dividendsLastYear.length === 4) {
-//     return dividendsLastYear.length
-//   }
-
-//   if (dividendsLastYear.length > 4) {
-//     return 12
-//   }
-
-//   return dividendsLastYear.length
-// }
-
 export const formatStockWithDiv = (
   allStockData: any
 ): FormattedStockWithDiv[] => {
@@ -45,47 +13,6 @@ export const formatStockWithDiv = (
 
   return allStockDivs
     .map((div) => {
-      // if (stockData?.stockData?.events?.dividends) {
-      //   const dividendEvents = stockData.stockData.events.dividends
-      //   if (!dividendEvents || Object.keys(dividendEvents).length === 0) {
-      //     return null
-      //   }
-      //   const currentPrice = stockData?.stockData?.meta?.regularMarketPrice || 0
-
-      //   if (currentPrice === 0) {
-      //     return null
-      //   }
-
-      //   const latestDivTimestamp = Math.max(
-      //     ...Object.keys(dividendEvents).map((x) => parseInt(x))
-      //   )
-
-      //   const lastDivAmount =
-      //     dividendEvents[latestDivTimestamp.toString()]?.amount || 0
-
-      //   if (lastDivAmount === 0) {
-      //     return null
-      //   }
-
-      //   const divFreq = getDivFrequency(dividendEvents)
-
-      //   const divYield = calculateDivYieldForStock(
-      //     currentPrice,
-      //     lastDivAmount,
-      //     getDivFrequency(dividendEvents)
-      //   )
-
-      //   return {
-      //     symbol: stockData.stockData.meta.symbol,
-      //     divYield: divYield * 100,
-      //     quantity: stockData.quantity,
-      //     totalDividendPerShare: divYield * currentPrice,
-      //     totalDividend: divYield * currentPrice * stockData.quantity
-      //   }
-      // }
-
-      // return null
-
       const stockData = div.stockData
       if (
         !stockData ||
@@ -112,16 +39,6 @@ export const formatStockWithDiv = (
     })
     .filter(Boolean)
 }
-
-// export const calculateDivYieldForStock = (
-//   stockPrice: number,
-//   lastDividend: number,
-//   multiplier: number
-// ) => {
-//   const divYield = (lastDividend * multiplier) / stockPrice
-
-//   return divYield
-// }
 
 export function generateTimestampNow(): string {
   const now = new Date()

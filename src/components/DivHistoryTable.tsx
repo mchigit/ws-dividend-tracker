@@ -3,11 +3,6 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid"
 import type { FeedItem } from "~types"
 import { formatToLocalTime, getAccountName } from "~utils/shared"
 
-// const people = [
-//   { name: 'Lindsay Walton', title: 'Front-end Developer', email: 'lindsay.walton@example.com', role: 'Member' },
-//   // More people...
-// ]
-
 export default function DivHistoryTable(props: {
   feedItems: FeedItem[]
   currentSort: string

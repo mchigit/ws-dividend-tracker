@@ -101,11 +101,6 @@ export default function TradeAccountTable(props: {
                 </span>
               </button>
             </th>
-            {/* <th
-              scope="col"
-              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-              Div / Share
-            </th> */}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 bg-white">
@@ -125,9 +120,6 @@ export default function TradeAccountTable(props: {
                 <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
                   ${position.totalDividend.toFixed(2)}
                 </td>
-                {/* <td className="whitespace-nowrap text-start px-3 py-4 text-sm text-gray-500">
-                  ${position.totalDividendPerShare.toFixed(2)}
-                </td> */}
               </tr>
             )
           })}

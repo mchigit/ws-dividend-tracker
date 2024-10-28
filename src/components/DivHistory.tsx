@@ -4,14 +4,12 @@ import type { FeedItem } from "~types"
 import { formatToLocalTime, getAccountName } from "~utils/shared"
 
 import { CircularPagination } from "./Pagination"
-// import DivHistoryTable from "./DivHistoryTable"
 
 const PAGE_SIZE = 10
 
 export default function DivHistory(props: { data: FeedItem[] }) {
   const { data } = props
   const [page, setPage] = React.useState(1)
-//   const [curSort, setCurSort] = React.useState<string>("date")
 
   const slicedData = data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const maxPage = Math.ceil(data.length / PAGE_SIZE)
@@ -84,7 +82,6 @@ export default function DivHistory(props: { data: FeedItem[] }) {
           ))}
         </tbody>
       </table>
-      {/* <DivHistoryTable feedItems={slicedData} currentSort={curSort} setSortBy={setCurSort} /> */}
       <CircularPagination
         activePage={page}
         maxPages={maxPage}

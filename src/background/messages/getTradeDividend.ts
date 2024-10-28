@@ -69,15 +69,6 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
         }
       })
       .filter(Boolean)
-    // formattedPositions.push({
-    //   currency: "CAD",
-    //   stock: {
-    //     symbol: "SRU.UN",
-    //     name: "SmartCentres REIT"
-    //   },
-    //   quantity: 1,
-    //   account_id: "rrsp-vfkjrmn6"
-    // })
 
     const dividends = await getAllDividends(formattedPositions, accessToken)
 

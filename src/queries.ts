@@ -1,7 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 
-// import {} from 'idb'
-
 import { sendToBackground } from "@plasmohq/messaging"
 
 import type { FeedItem, FilterValues } from "~types"
@@ -139,16 +137,3 @@ export const useFetchDivDetailsQuery = () =>
     queryFn: () => fetchDivDetails(),
     refetchOnWindowFocus: false
   })
-
-// const fetchAllHoldings = async (accessToken: string) => {
-//   const allAccounts = await getAccountInfoFromDB()
-
-//   if (!allAccounts || allAccounts.length === 0) {
-//     return null
-//   }
-
-// }
-
-// export const useFetchAllHoldingsQuery = () => {
-
-// }

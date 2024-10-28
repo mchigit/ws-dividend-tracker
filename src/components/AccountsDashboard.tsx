@@ -1,17 +1,3 @@
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
 import CashIcon from "data-base64:~assets/cashIcon.svg"
 import ManagedIcon from "data-base64:~assets/managedIcon.png"
 import openNewTab from "data-base64:~assets/openNewTab.svg"

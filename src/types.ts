@@ -2,14 +2,14 @@ export interface Balance {
   amount: string
   currency: string
   cents: number
-  __typename: string // You may want to replace this with a more specific type if possible
+  __typename: string
 }
 
 export interface InterestRate {
   id: string
   interestRate: string
   interestRateBoosted: boolean
-  __typename: string // You may want to replace this with a more specific type if possible
+  __typename: string
 }
 
 export interface CashAccount {
@@ -73,7 +73,7 @@ export interface Account {
   nickname: string
   status: string
   type: string
-  financials: any // Adjust type if you have more specific financials structure
+  financials: any
   unifiedAccountType: string
 }
 
