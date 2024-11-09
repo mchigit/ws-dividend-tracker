@@ -4,6 +4,8 @@ export type FormattedStockWithDiv = {
   totalDividendPerShare: number
   totalDividend: number
   quantity: number
+  account_id: string
+  price: number
 }
 
 export const formatStockWithDiv = (
@@ -28,6 +30,8 @@ export const formatStockWithDiv = (
       const totalDividendPerShare = (divYield / 100) * currentPrice
 
       return {
+        ...div,
+        price: currentPrice,
         symbol: stockData.stock,
         divYield,
         quantity,
@@ -144,7 +148,29 @@ export function sortTable(
         }
         return b.totalDividendPerShare - a.totalDividendPerShare
       })
+    case "price":
+      return positions.sort((a, b) => {
+        if (direction === "asc") {
+          return a.price - b.price
+        }
+        return b.price - a.price
+      })
     default:
       return positions
   }
+}
+
+export function formatUnifiedAccountType(unifiedAccountType: string) {
+  return unifiedAccountType.replace(/_/g, " ").toUpperCase()
+}
+
+export function filterPositionsByAccount(
+  positions: FormattedStockWithDiv[],
+  accountIds: string[]
+) {
+  if (accountIds.length === 0) {
+    return positions
+  }
+
+  return positions.filter((pos) => accountIds.includes(pos.account_id))
 }

@@ -272,7 +272,7 @@ export async function getManagedAccountPositions(
     // Search WS GraphQL for the actual security
 
     const positions = json?.data?.account?.positions
-    if (!positions) return null
+    if (!positions || positions.length === 0) return []
 
     const positionsWithSecId = await Promise.all(
       positions.map(async (position) => {
@@ -283,7 +283,8 @@ export async function getManagedAccountPositions(
 
         return {
           ...position,
-          id: secId
+          id: secId,
+          account_id: json?.data?.account?.id
         }
       })
     )

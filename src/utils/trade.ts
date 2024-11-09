@@ -33,6 +33,7 @@ export const getAllDividends = async (
         stockDivYield?.data?.security?.quote?.last
       ) {
         return {
+          ...position,
           quantity: position.quantity,
           stockData: {
             dividendYield: stockDivYield.data.security.fundamentals.yield * 100,

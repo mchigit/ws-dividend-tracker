@@ -65,10 +65,13 @@ const getManagedAccountData = async (
           primary_exchange: ""
         },
         quantity: parseFloat(positions.quantity),
-        account_id: positions.id,
+        account_id: positions.account_id,
         currency: positions.currency,
         type: positions.type,
-        sec_id: positions.id
+        sec_id: positions.id,
+        accountInfo: formattedAccFiniancials.find(
+          (acc) => acc.id === positions.account_id
+        )
       }
     })
     .filter((pos) => {
@@ -92,6 +95,8 @@ const getTradeAccountData = async (
   allAccFiniancials: any,
   accessToken: string
 ) => {
+  const formattedAccFiniancials = formatAllAccFiniancialData(allAccFiniancials)
+
   const tradePositions = await getTradePositions(accessToken)
 
   const filteredTradePositions = tradePositions.filter((pos) => {
@@ -112,18 +117,16 @@ const getTradeAccountData = async (
   const formattedPositions: Array<any> = filteredTradePositions
     .map((position: any) => {
       if (position.active) {
-        const accountId = position.account_id
-        const accountInfo =
-          allAccFiniancials?.data?.identity?.accounts?.edges?.find(
-            (account: any) => account?.node?.id === accountId
-          )
+        const accountInfo = formattedAccFiniancials.find(
+          (acc) => acc.id === position.account_id
+        )
         return {
           currency: position.currency,
           stock: position.stock,
           quantity: position.quantity,
           account_id: position.account_id,
           sec_id: position.id,
-          accountInfo: accountInfo?.node
+          accountInfo: accountInfo
         }
       }
     })
@@ -138,9 +141,9 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log("Received a message from the content script:", req)
 
   try {
-    // const storedData = await storage.get("ws-div-data")
+    const storedData = await storage.get("ws-div-data")
 
-    const storedData = null
+    // const storedData = null
 
     const cookie = await getCookie()
 
