@@ -16,32 +16,21 @@ import { formatAllAccFiniancialData } from "~utils/wealthsimple"
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
 
 const getRespFromBackground = async () => {
-  const [cashResp, tradeResp, managedRes] = await Promise.all([
-    sendToBackground({ name: "getCashDiv" }),
-    sendToBackground({ name: "getTradeDividend" }),
-    sendToBackground({ name: "getManagedAcc" })
-  ])
+  const allData = await sendToBackground({ name: "getAllAccountDivs" })
+
+  const { cashResp, tradeResp, managedRes, createdAt } = allData
 
   let isOldData = false
-  if (cashResp?.createdAt) {
-    const createdAt = new Date(cashResp.createdAt)
+  if (createdAt) {
+    const createdAtDate = new Date(createdAt)
     const now = new Date()
-    const diff = now.getTime() - createdAt.getTime()
+    const diff = now.getTime() - createdAtDate.getTime()
     if (diff > DAYS_IN_MS) {
       isOldData = true
     }
   }
 
   if (!cashResp || !tradeResp || !managedRes) {
-    return {
-      cashResp: null,
-      tradeResp: null,
-      managedRes: null,
-      isOldData: undefined
-    }
-  }
-
-  if (cashResp?.error || tradeResp?.error || managedRes?.error) {
     return {
       cashResp: null,
       tradeResp: null,

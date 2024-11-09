@@ -9,9 +9,7 @@ export type FormattedStockWithDiv = {
 export const formatStockWithDiv = (
   allStockData: any
 ): FormattedStockWithDiv[] => {
-  const allStockDivs = allStockData.dividends
-
-  return allStockDivs
+  return allStockData
     .map((div) => {
       const stockData = div.stockData
       if (

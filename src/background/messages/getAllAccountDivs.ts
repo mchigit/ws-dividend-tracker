@@ -1,0 +1,203 @@
+import type { PlasmoMessaging } from "@plasmohq/messaging"
+
+import type { Position } from "~types"
+import { getCookie } from "~utils/cookie"
+import {
+  getAllAccountFiniancials,
+  getCashAccountInterestRate,
+  getManagedAccountPositions
+} from "~utils/graphql"
+import storage from "~utils/storage"
+import { getAllDividends, getTradePositions } from "~utils/trade"
+import { formatAllAccFiniancialData } from "~utils/wealthsimple"
+
+const getCashAccountData = async (
+  allAccFiniancials: any,
+  accessToken: string
+) => {
+  const cashAccount = allAccFiniancials?.data?.identity?.accounts?.edges?.find(
+    (account: any) => account?.node?.id.includes("cash")
+  )
+
+  if (!cashAccount) {
+    return null
+  }
+
+  const balance =
+    cashAccount?.node?.financials?.currentCombined?.netLiquidationValue
+  const cashAccountId = cashAccount?.node?.id
+
+  const interestRate = await getCashAccountInterestRate(
+    cashAccountId,
+    accessToken
+  )
+
+  return {
+    balance,
+    interestRate
+  }
+}
+
+const getManagedAccountData = async (
+  allAccFiniancials: any,
+  accessToken: string
+) => {
+  const formattedAccFiniancials = formatAllAccFiniancialData(allAccFiniancials)
+
+  const managedAccs = formattedAccFiniancials.filter((acc) =>
+    acc.unifiedAccountType.toLowerCase().includes("managed")
+  )
+
+  const allPositions = await Promise.all(
+    managedAccs.map(async (acc) => {
+      return await getManagedAccountPositions(accessToken, acc.id)
+    })
+  )
+
+  const flattedPositions = allPositions.flat()
+
+  const allFormattedPositions: Position[] = flattedPositions
+    .map((positions) => {
+      return {
+        stock: {
+          symbol: positions.symbol,
+          name: positions.name,
+          primary_exchange: ""
+        },
+        quantity: parseFloat(positions.quantity),
+        account_id: positions.id,
+        currency: positions.currency,
+        type: positions.type,
+        sec_id: positions.id
+      }
+    })
+    .filter((pos) => {
+      if (
+        pos.quantity === 0 ||
+        pos.type === "currency" ||
+        !pos?.stock?.symbol
+      ) {
+        return false
+      }
+
+      return true
+    })
+
+  const stockWithDiv = await getAllDividends(allFormattedPositions, accessToken)
+
+  return stockWithDiv
+}
+
+const getTradeAccountData = async (
+  allAccFiniancials: any,
+  accessToken: string
+) => {
+  const tradePositions = await getTradePositions(accessToken)
+
+  const filteredTradePositions = tradePositions.filter((pos) => {
+    if (
+      pos?.security_type === "option" ||
+      pos?.active === false ||
+      pos?.quantity === 0
+    ) {
+      return false
+    }
+
+    return (
+      pos?.security_type === "equity" ||
+      pos?.security_type === "exchange_traded_fund"
+    )
+  })
+
+  const formattedPositions: Array<any> = filteredTradePositions
+    .map((position: any) => {
+      if (position.active) {
+        const accountId = position.account_id
+        const accountInfo =
+          allAccFiniancials?.data?.identity?.accounts?.edges?.find(
+            (account: any) => account?.node?.id === accountId
+          )
+        return {
+          currency: position.currency,
+          stock: position.stock,
+          quantity: position.quantity,
+          account_id: position.account_id,
+          sec_id: position.id,
+          accountInfo: accountInfo?.node
+        }
+      }
+    })
+    .filter(Boolean)
+
+  const dividends = await getAllDividends(formattedPositions, accessToken)
+
+  return dividends
+}
+
+const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
+  console.log("Received a message from the content script:", req)
+
+  try {
+    // const storedData = await storage.get("ws-div-data")
+
+    const storedData = null
+
+    const cookie = await getCookie()
+
+    if (!cookie) {
+      if (storedData) {
+        return res.send(storedData)
+      }
+
+      res.send({
+        error: "No Cookie"
+      })
+      return
+    }
+
+    if (storedData) {
+      const { createdAt } = storedData as any
+
+      if (createdAt + 600000 > new Date().getTime()) {
+        res.send(storedData)
+        return
+      }
+    }
+
+    const decodedAuthCookie = JSON.parse(decodeURIComponent(cookie.value))
+    const accessToken = decodedAuthCookie.access_token
+    const idenitityId = decodedAuthCookie.identity_canonical_id
+
+    const allAccFiniancials = await getAllAccountFiniancials(
+      accessToken,
+      idenitityId
+    )
+
+    const cashData = await getCashAccountData(allAccFiniancials, accessToken)
+
+    const tradeData = await getTradeAccountData(allAccFiniancials, accessToken)
+
+    const managedData = await getManagedAccountData(
+      allAccFiniancials,
+      accessToken
+    )
+
+    const dataToStore = {
+      cashResp: cashData,
+      tradeResp: tradeData,
+      managedRes: managedData,
+      createdAt: new Date().getTime()
+    }
+
+    await storage.set("ws-div-data", dataToStore)
+
+    res.send(dataToStore)
+  } catch (error) {
+    console.error("Error in getAllAccountDivs:", error)
+    res.send({
+      error: "Error in getAllAccountDivs"
+    })
+  }
+}
+
+export default handler
