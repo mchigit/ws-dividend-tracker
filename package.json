@@ -1,7 +1,7 @@
 {
   "name": "ws-dividend-tracker",
   "displayName": "WealthSimple Dividend Tracker",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "description": "Track your dividends from WealthSimple and visualize your progress to financial independence!",
   "author": "CafDev Studio <caffein.dev@gmail.com>",
   "scripts": {

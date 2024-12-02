@@ -32,7 +32,7 @@ function PopupComponet() {
               refresh.
             </Alert>
           )}
-          {tradeResp && cashResp && managedRes ? (
+          {tradeResp || cashResp || managedRes ? (
             <AccountsDashboard
               tradePositions={tradeResp}
               cashAccount={cashResp}

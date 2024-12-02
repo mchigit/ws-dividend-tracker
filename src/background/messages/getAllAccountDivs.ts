@@ -15,26 +15,32 @@ const getCashAccountData = async (
   allAccFiniancials: any,
   accessToken: string
 ) => {
-  const cashAccount = allAccFiniancials?.data?.identity?.accounts?.edges?.find(
-    (account: any) => account?.node?.id.includes("cash")
-  )
+  try {
+    const cashAccount =
+      allAccFiniancials?.data?.identity?.accounts?.edges?.find((account: any) =>
+        account?.node?.id?.includes("cash")
+      )
 
-  if (!cashAccount) {
+    if (!cashAccount) {
+      return null
+    }
+
+    const balance =
+      cashAccount?.node?.financials?.currentCombined?.netLiquidationValue
+    const cashAccountId = cashAccount?.node?.id
+
+    const interestRate = await getCashAccountInterestRate(
+      cashAccountId,
+      accessToken
+    )
+
+    return {
+      balance,
+      interestRate
+    }
+  } catch (error) {
+    console.error("Error in getCashAccountData:", error)
     return null
-  }
-
-  const balance =
-    cashAccount?.node?.financials?.currentCombined?.netLiquidationValue
-  const cashAccountId = cashAccount?.node?.id
-
-  const interestRate = await getCashAccountInterestRate(
-    cashAccountId,
-    accessToken
-  )
-
-  return {
-    balance,
-    interestRate
   }
 }
 
@@ -42,99 +48,114 @@ const getManagedAccountData = async (
   allAccFiniancials: any,
   accessToken: string
 ) => {
-  const formattedAccFiniancials = formatAllAccFiniancialData(allAccFiniancials)
+  try {
+    const formattedAccFiniancials =
+      formatAllAccFiniancialData(allAccFiniancials)
 
-  const managedAccs = formattedAccFiniancials.filter((acc) =>
-    acc.unifiedAccountType.toLowerCase().includes("managed")
-  )
+    const managedAccs = formattedAccFiniancials
+      .filter((acc) => acc.unifiedAccountType.toLowerCase().includes("managed"))
+      .filter((acc) => !!acc.id)
 
-  const allPositions = await Promise.all(
-    managedAccs.map(async (acc) => {
-      return await getManagedAccountPositions(accessToken, acc.id)
-    })
-  )
+    const allPositions = await Promise.all(
+      managedAccs.map(async (acc) => {
+        return await getManagedAccountPositions(accessToken, acc.id)
+      })
+    )
 
-  const flattedPositions = allPositions.flat()
+    const flattedPositions = allPositions.flat()
 
-  const allFormattedPositions: Position[] = flattedPositions
-    .map((positions) => {
-      return {
-        stock: {
-          symbol: positions.symbol,
-          name: positions.name,
-          primary_exchange: ""
-        },
-        quantity: parseFloat(positions.quantity),
-        account_id: positions.account_id,
-        currency: positions.currency,
-        type: positions.type,
-        sec_id: positions.id,
-        accountInfo: formattedAccFiniancials.find(
-          (acc) => acc.id === positions.account_id
-        )
-      }
-    })
-    .filter((pos) => {
-      if (
-        pos.quantity === 0 ||
-        pos.type === "currency" ||
-        !pos?.stock?.symbol
-      ) {
-        return false
-      }
+    const allFormattedPositions: Position[] = flattedPositions
+      .map((positions) => {
+        return {
+          stock: {
+            symbol: positions.symbol,
+            name: positions.name,
+            primary_exchange: ""
+          },
+          quantity: parseFloat(positions.quantity),
+          account_id: positions.account_id,
+          currency: positions.currency,
+          type: positions.type,
+          sec_id: positions?.id,
+          accountInfo: formattedAccFiniancials.find(
+            (acc) => acc?.id === positions?.account_id
+          )
+        }
+      })
+      .filter((pos) => {
+        if (
+          pos.quantity === 0 ||
+          pos.type === "currency" ||
+          !pos?.stock?.symbol
+        ) {
+          return false
+        }
 
-      return true
-    })
+        return true
+      })
 
-  const stockWithDiv = await getAllDividends(allFormattedPositions, accessToken)
+    const stockWithDiv = await getAllDividends(
+      allFormattedPositions,
+      accessToken
+    )
 
-  return stockWithDiv
+    return stockWithDiv
+  } catch (error) {
+    console.error("Error in getManagedAccountData:", error)
+    return null
+  }
 }
 
 const getTradeAccountData = async (
   allAccFiniancials: any,
   accessToken: string
 ) => {
-  const formattedAccFiniancials = formatAllAccFiniancialData(allAccFiniancials)
+  try {
+    const formattedAccFiniancials =
+      formatAllAccFiniancialData(allAccFiniancials)
 
-  const tradePositions = await getTradePositions(accessToken)
+    const tradePositions = await getTradePositions(accessToken)
 
-  const filteredTradePositions = tradePositions.filter((pos) => {
-    if (
-      pos?.security_type === "option" ||
-      pos?.active === false ||
-      pos?.quantity === 0
-    ) {
-      return false
-    }
-
-    return (
-      pos?.security_type === "equity" ||
-      pos?.security_type === "exchange_traded_fund"
-    )
-  })
-
-  const formattedPositions: Array<any> = filteredTradePositions
-    .map((position: any) => {
-      if (position.active) {
-        const accountInfo = formattedAccFiniancials.find(
-          (acc) => acc.id === position.account_id
-        )
-        return {
-          currency: position.currency,
-          stock: position.stock,
-          quantity: position.quantity,
-          account_id: position.account_id,
-          sec_id: position.id,
-          accountInfo: accountInfo
-        }
+    const filteredTradePositions = tradePositions.filter((pos) => {
+      if (
+        pos?.security_type === "option" ||
+        pos?.active === false ||
+        pos?.quantity === 0
+      ) {
+        return false
       }
+
+      return (
+        pos?.security_type === "equity" ||
+        pos?.security_type === "exchange_traded_fund"
+      )
     })
-    .filter(Boolean)
 
-  const dividends = await getAllDividends(formattedPositions, accessToken)
+    const formattedPositions: Array<any> = filteredTradePositions
+      .map((position: any) => {
+        if (position.active) {
+          const accountInfo = formattedAccFiniancials.find(
+            (acc) => acc?.id === position.account_id
+          )
+          return {
+            currency: position.currency,
+            stock: position.stock,
+            quantity: position.quantity,
+            account_id: position.account_id,
+            sec_id: position?.id,
+            accountInfo: accountInfo
+          }
+        }
+      })
+      .filter(Boolean)
 
-  return dividends
+    const dividends = await getAllDividends(formattedPositions, accessToken)
+
+    return dividends
+  } catch (error) {
+    console.error("Error in getTradeAccountData:", error)
+    return null
+  }
 }
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
