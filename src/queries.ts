@@ -30,7 +30,7 @@ const getRespFromBackground = async () => {
     }
   }
 
-  if (!cashResp || !tradeResp || !managedRes) {
+  if (!cashResp && !tradeResp && !managedRes) {
     return {
       cashResp: null,
       tradeResp: null,

@@ -15,6 +15,7 @@ export interface InterestRate {
 export interface CashAccount {
   balance: Balance
   interestRate: InterestRate
+  accInfo: any
 }
 
 export type Stock = {
@@ -84,4 +85,8 @@ export type FilterValues = {
     unifiedAccountType: string
   }>
   symbols: string[]
+}
+
+export interface CashAccounts {
+  cashAccounts: CashAccount[]
 }

@@ -3,7 +3,7 @@ import "~style.css"
 import { Switch } from "@headlessui/react"
 import { Spinner } from "@material-tailwind/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import Select from "react-select"
 
 import DivBarChart from "~components/DivBarChart"
@@ -17,19 +17,7 @@ import { ACC_TYPES, getAccountName, HISTORY_FILTERS } from "~utils/shared"
 
 const queryClient = new QueryClient()
 
-const getTotalAmount = (items: FeedItem[], yearToDate?: boolean) => {
-  if (yearToDate) {
-    const currentYear = new Date().getFullYear()
-    const total = items.reduce((acc, item) => {
-      const itemYear = new Date(item.occurredAt).getFullYear()
-      return itemYear === currentYear
-        ? acc + parseFloat(item.amount.toString())
-        : acc
-    }, 0)
-
-    return total.toFixed(2)
-  }
-
+const getTotalAmount = (items: FeedItem[]) => {
   const total = items.reduce((acc, item) => {
     return acc + parseFloat(item.amount.toString())
   }, 0)
@@ -186,7 +174,7 @@ function filterFeedItems(
   activeFilters: Record<string, string[]>
 ): FeedItem[] {
   let filteredFeedItems = data
-  
+
   if (activeFilters) {
     if (activeFilters[HISTORY_FILTERS.BY_ACCOUNT]?.length > 0) {
       filteredFeedItems = filteredFeedItems.filter((item) =>
@@ -202,9 +190,9 @@ function filterFeedItems(
 
     if (activeFilters[HISTORY_FILTERS.BY_ACC_TYPE]?.length > 0) {
       filteredFeedItems = filteredFeedItems.filter((item) => {
-        return item.unifiedAccountType.toLowerCase().includes(
-          activeFilters[HISTORY_FILTERS.BY_ACC_TYPE][0].toLowerCase()
-        )
+        return item.unifiedAccountType
+          .toLowerCase()
+          .includes(activeFilters[HISTORY_FILTERS.BY_ACC_TYPE][0].toLowerCase())
       })
     }
   }
@@ -217,6 +205,9 @@ function WsDividendDetails() {
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>(
     {}
   )
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  )
 
   const { data, isLoading } = useFetchDivDetailsQuery()
 
@@ -224,6 +215,31 @@ function WsDividendDetails() {
     data?.feedItems || [],
     activeFilters
   )
+
+  // Get unique years from feed items
+  const availableYears = useMemo(() => {
+    if (!data?.feedItems?.length) return []
+    return Array.from(
+      new Set(
+        data.feedItems.map((item) => new Date(item.occurredAt).getFullYear())
+      )
+    ).sort((a, b) => b - a) // Sort descending
+  }, [data?.feedItems])
+
+  const yearFilteredItems = useMemo(() => {
+    return filteredFeedItems.filter(
+      (item) => new Date(item.occurredAt).getFullYear() === selectedYear
+    )
+  }, [filteredFeedItems, selectedYear])
+
+  const handleYearChange = (direction: "prev" | "next") => {
+    const currentIndex = availableYears.indexOf(selectedYear)
+    if (direction === "prev" && currentIndex < availableYears.length - 1) {
+      setSelectedYear(availableYears[currentIndex + 1])
+    } else if (direction === "next" && currentIndex > 0) {
+      setSelectedYear(availableYears[currentIndex - 1])
+    }
+  }
 
   return (
     <div className="w-full">
@@ -244,7 +260,24 @@ function WsDividendDetails() {
         {data && data?.feedItems?.length > 0 && (
           <>
             <div className="flex items-center justify-between w-full">
-              <h1 className="text-3xl font-bold">Year to date</h1>
+              <div className="flex items-center gap-x-4">
+                <button
+                  onClick={() => handleYearChange("prev")}
+                  disabled={
+                    availableYears.indexOf(selectedYear) ===
+                    availableYears.length - 1
+                  }
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Previous Year
+                </button>
+                <h1 className="text-3xl font-bold">{selectedYear}</h1>
+                <button
+                  onClick={() => handleYearChange("next")}
+                  disabled={availableYears.indexOf(selectedYear) === 0}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Next Year
+                </button>
+              </div>
               <div className="flex items-center gap-x-3">
                 <p className="text-lg font-semibold text-gray-800">Separate</p>
                 <Switch
@@ -261,10 +294,13 @@ function WsDividendDetails() {
             </div>
 
             <h2 className="text-lg mt-4">
-              Total: ${getTotalAmount(data.feedItems, true)}
+              Total: ${getTotalAmount(yearFilteredItems)}
             </h2>
             <div className="w-full h-[500px] my-8">
-              <DivBarChart stackedGraph={graphStacked} data={data.feedItems} />{" "}
+              <DivBarChart
+                stackedGraph={graphStacked}
+                data={yearFilteredItems}
+              />
             </div>
           </>
         )}
@@ -292,16 +328,15 @@ function WsDividendDetails() {
                 </>
               )}
             </div>
-            {!isLoading &&
-              filteredFeedItems.length === 0 && (
-                <div className="overflow-hidden rounded-lg bg-gray-200 !w-[500px]">
-                  <div className="px-4 py-5 sm:p-6 flex items-center justify-center w-full">
-                    <p className="text-md">
-                      No data found for the selected filters.
-                    </p>
-                  </div>
+            {!isLoading && filteredFeedItems.length === 0 && (
+              <div className="overflow-hidden rounded-lg bg-gray-200 !w-[500px]">
+                <div className="px-4 py-5 sm:p-6 flex items-center justify-center w-full">
+                  <p className="text-md">
+                    No data found for the selected filters.
+                  </p>
                 </div>
-              )}
+              </div>
+            )}
             {filteredFeedItems.length > 0 && (
               <DivHistory data={filteredFeedItems} />
             )}

@@ -1,3 +1,4 @@
+import { Alert } from "@material-tailwind/react"
 import CashIcon from "data-base64:~assets/cashIcon.svg"
 import ManagedIcon from "data-base64:~assets/managedIcon.png"
 import openNewTab from "data-base64:~assets/openNewTab.svg"
@@ -25,18 +26,23 @@ function classNames(...classes) {
 }
 
 export default function AccountsDashboard(props: {
-  cashAccount: CashAccount
-  tradePositions: Position[]
-  ManagedAccData: ManagedPosition[]
+  cashAccount: CashAccount[] | null
+  tradePositions: Position[] | null
+  ManagedAccData: ManagedPosition[] | null
 }) {
   const [currentTab, setCurrentTab] = useState<string | null>("Cash")
+  const { cashAccount, tradePositions, ManagedAccData } = props
 
   const setCurrentTabHandler = (tab: string) => {
     setCurrentTab(tab)
   }
 
-  const positionWithDividends = formatStockWithDiv(props.tradePositions)
-  const managedPosWithDiv = formatStockWithDiv(props.ManagedAccData)
+  const positionWithDividends = tradePositions
+    ? formatStockWithDiv(tradePositions)
+    : null
+  const managedPosWithDiv = ManagedAccData
+    ? formatStockWithDiv(ManagedAccData)
+    : null
 
   const totalTradeDividends = positionWithDividends
     ? positionWithDividends.reduce((acc, pos) => acc + pos.totalDividend, 0)
@@ -46,10 +52,17 @@ export default function AccountsDashboard(props: {
     ? managedPosWithDiv.reduce((acc, pos) => acc + pos.totalDividend, 0)
     : 0
 
-  const cashYearlyTotal = getYearlyTotal(
-    props.cashAccount.balance.cents / 100,
-    parseFloat(props.cashAccount.interestRate.interestRate)
-  )
+  const cashYearlyTotal = cashAccount
+    ? cashAccount.reduce((total, account) => {
+        return (
+          total +
+          getYearlyTotal(
+            account.balance.cents / 100,
+            parseFloat(account.interestRate.interestRate)
+          )
+        )
+      }, 0)
+    : 0
 
   const totalDividends = (
     totalTradeDividends +
@@ -101,15 +114,24 @@ export default function AccountsDashboard(props: {
         </nav>
       </div>
       <div className="mt-4">
-        {currentTab === "Cash" && (
-          <CashAccountTable cashAccount={props.cashAccount} />
-        )}
-        {currentTab === "Self-Directed" && (
-          <TradeAccountTable tradePositions={props.tradePositions} />
-        )}
-        {currentTab === "Managed" && (
-          <ManagedAccountTable managedPositions={props.ManagedAccData} />
-        )}
+        {currentTab === "Cash" &&
+          (cashAccount ? (
+            <CashAccountTable cashAccounts={cashAccount} />
+          ) : (
+            <Alert>No cash account data available</Alert>
+          ))}
+        {currentTab === "Self-Directed" &&
+          (tradePositions ? (
+            <TradeAccountTable tradePositions={tradePositions} />
+          ) : (
+            <Alert>No trade account data available</Alert>
+          ))}
+        {currentTab === "Managed" &&
+          (ManagedAccData ? (
+            <ManagedAccountTable managedPositions={ManagedAccData} />
+          ) : (
+            <Alert>No managed account data available</Alert>
+          ))}
       </div>
     </div>
   )
