@@ -34,19 +34,10 @@ function transformDataForGraph(data) {
 
   const aggregatedData = {}
 
-  const currentYear = new Date().getFullYear()
-
-  // Filter out items that did not occur in the current year
-  const filteredItems = data.filter((item) => {
-    const year = new Date(item.occurredAt).getFullYear()
-    return year === currentYear
-  })
-
-  filteredItems.forEach((item) => {
+  data.forEach((item) => {
     const date = new Date(item.occurredAt)
     const month = monthMap[date.toISOString().slice(5, 7)]
 
-    // Initialize the month if it doesn't exist
     if (!aggregatedData[month]) {
       aggregatedData[month] = {
         name: month,
@@ -56,7 +47,6 @@ function transformDataForGraph(data) {
       }
     }
 
-    // Convert the amount to a number and add to the appropriate field
     const amount = parseFloat(item.amount.toString())
 
     if (item.unifiedAccountType.toLowerCase().includes("cash")) {
@@ -70,7 +60,7 @@ function transformDataForGraph(data) {
     }
   })
 
-  const orderedData = Object.keys(monthMap)
+  return Object.keys(monthMap)
     .sort()
     .map((key) => {
       const month = monthMap[key]
@@ -81,7 +71,6 @@ function transformDataForGraph(data) {
         "Managed Dividends": 0
       }
 
-      // Round amounts to two decimal places
       monthData["Cash Interest"] = parseFloat(
         monthData["Cash Interest"]
       ).toFixed(2)
@@ -94,8 +83,6 @@ function transformDataForGraph(data) {
 
       return monthData
     })
-
-  return orderedData
 }
 
 const CustomTooltip = ({
@@ -129,7 +116,6 @@ export default function DivBarChart(props: {
   stackedGraph?: boolean
 }) {
   const { data, stackedGraph } = props
-
   const allData = transformDataForGraph(data)
 
   return (

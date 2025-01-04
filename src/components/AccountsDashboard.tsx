@@ -26,7 +26,7 @@ function classNames(...classes) {
 }
 
 export default function AccountsDashboard(props: {
-  cashAccount: CashAccount | null
+  cashAccount: CashAccount[] | null
   tradePositions: Position[] | null
   ManagedAccData: ManagedPosition[] | null
 }) {
@@ -53,10 +53,15 @@ export default function AccountsDashboard(props: {
     : 0
 
   const cashYearlyTotal = cashAccount
-    ? getYearlyTotal(
-        cashAccount.balance.cents / 100,
-        parseFloat(cashAccount.interestRate.interestRate)
-      )
+    ? cashAccount.reduce((total, account) => {
+        return (
+          total +
+          getYearlyTotal(
+            account.balance.cents / 100,
+            parseFloat(account.interestRate.interestRate)
+          )
+        )
+      }, 0)
     : 0
 
   const totalDividends = (
@@ -111,7 +116,7 @@ export default function AccountsDashboard(props: {
       <div className="mt-4">
         {currentTab === "Cash" &&
           (cashAccount ? (
-            <CashAccountTable cashAccount={cashAccount} />
+            <CashAccountTable cashAccounts={cashAccount} />
           ) : (
             <Alert>No cash account data available</Alert>
           ))}

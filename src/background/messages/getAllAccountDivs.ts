@@ -16,28 +16,35 @@ const getCashAccountData = async (
   accessToken: string
 ) => {
   try {
-    const cashAccount =
-      allAccFiniancials?.data?.identity?.accounts?.edges?.find((account: any) =>
-        account?.node?.id?.includes("cash")
+    const cashAccounts =
+      allAccFiniancials?.data?.identity?.accounts?.edges?.filter(
+        (account: any) => account?.node?.id?.includes("ca-cash")
       )
 
-    if (!cashAccount) {
+    if (!cashAccounts || cashAccounts.length === 0) {
       return null
     }
 
-    const balance =
-      cashAccount?.node?.financials?.currentCombined?.netLiquidationValue
-    const cashAccountId = cashAccount?.node?.id
+    const cashAccountsData = await Promise.all(
+      cashAccounts.map(async (account) => {
+        const balance =
+          account?.node?.financials?.currentCombined?.netLiquidationValue
+        const cashAccountId = account?.node?.id
 
-    const interestRate = await getCashAccountInterestRate(
-      cashAccountId,
-      accessToken
+        const interestRate = await getCashAccountInterestRate(
+          cashAccountId,
+          accessToken
+        )
+
+        return {
+          balance,
+          interestRate,
+          accInfo: account?.node
+        }
+      })
     )
 
-    return {
-      balance,
-      interestRate
-    }
+    return cashAccountsData
   } catch (error) {
     console.error("Error in getCashAccountData:", error)
     return null
