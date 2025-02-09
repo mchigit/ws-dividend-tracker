@@ -1,10 +1,24 @@
+import { Spinner, Tooltip } from "@material-tailwind/react"
+import { useEffect, useState } from "react"
+
+import { useExportCashTransactionsQuery } from "~queries"
 import type { CashAccount } from "~types"
+import { getCookie } from "~utils/cookie"
 import { getYearlyTotal } from "~utils/graphql"
 
 export default function CashAccountTable(props: {
   cashAccounts: CashAccount[]
 }) {
   const { cashAccounts } = props
+  const [cookieExists, setCookieExists] = useState(false)
+
+  useEffect(() => {
+    const checkCookie = async () => {
+      const cookie = await getCookie()
+      setCookieExists(!!cookie)
+    }
+    checkCookie()
+  }, [])
 
   const totalBalance = cashAccounts.reduce(
     (acc, account) => acc + account.balance.cents / 100,
@@ -20,6 +34,18 @@ export default function CashAccountTable(props: {
       )
     )
   }, 0)
+
+  const cashAccountsData = cashAccounts.map((account) => ({
+    id: account.accInfo.id,
+    name:
+      account.accInfo?.accountOwnerConfiguration === "MULTI_OWNER"
+        ? "Cash (Joint)"
+        : "Cash",
+    nickname: account.accInfo?.nickname || ""
+  }))
+
+  const { mutate: exportCashTransactions, isPending } =
+    useExportCashTransactionsQuery()
 
   return (
     <>
@@ -116,6 +142,53 @@ export default function CashAccountTable(props: {
             })}
           </tbody>
         </table>
+      </div>
+      <div className="flex items-center justify-center gap-4 mt-2">
+        {/* <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
+          Export Balance
+        </button> */}
+        {/* <button className="text-gray-500 px-4 py-2 rounded-md">
+          Export Transactions
+        </button> */}
+        {cookieExists ? (
+          <button
+            type="button"
+            className="rounded bg-white px-4 py-1 text-base font-semibold text-gray-900 shadow-sm ring-1 
+        ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!cookieExists}
+            onClick={() =>
+              exportCashTransactions({ accounts: cashAccountsData })
+            }>
+            {isPending ? (
+              <Spinner className="h-6 w-6" />
+            ) : (
+              "Export Transactions"
+            )}
+          </button>
+        ) : (
+          <Tooltip
+            content={
+              !cookieExists
+                ? "Please login to WealthSimple to export transactions"
+                : ""
+            }
+            placement="bottom">
+            <button
+              type="button"
+              className="rounded bg-white px-4 py-1 text-base font-semibold text-gray-900 shadow-sm ring-1 
+        ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!cookieExists}
+              onClick={() =>
+                exportCashTransactions({ accounts: cashAccountsData })
+              }>
+              {isPending ? (
+                <Spinner className="h-6 w-6" />
+              ) : (
+                "Export Transactions"
+              )}
+            </button>
+          </Tooltip>
+        )}
       </div>
     </>
   )

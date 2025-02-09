@@ -1,5 +1,9 @@
 # Changelog
 
+## v4.6.0
+
+- Added export cash transactions feature.
+
 ## v4.5.0
 
 - Handle multiple cash accounts.
