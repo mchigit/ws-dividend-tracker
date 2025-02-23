@@ -6,6 +6,7 @@ export type FormattedStockWithDiv = {
   quantity: number
   account_id: string
   price: number
+  book_value?: number
 }
 
 export const formatStockWithDiv = (
@@ -36,7 +37,8 @@ export const formatStockWithDiv = (
         divYield,
         quantity,
         totalDividendPerShare,
-        totalDividend
+        totalDividend,
+        book_value: div.book_value
       }
     })
     .filter(Boolean)
