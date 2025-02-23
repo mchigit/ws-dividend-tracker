@@ -174,3 +174,17 @@ export function filterPositionsByAccount(
 
   return positions.filter((pos) => accountIds.includes(pos.account_id))
 }
+
+export const combinePositions = (positions: FormattedStockWithDiv[]) => {
+  return positions.reduce((acc, curr) => {
+    const existingItem = acc.find((item) => item.symbol === curr.symbol)
+    if (existingItem) {
+      existingItem.quantity += curr.quantity
+      existingItem.totalDividend += curr.totalDividend
+      existingItem.totalDividendPerShare += curr.totalDividendPerShare
+    } else {
+      acc.push(curr)
+    }
+    return acc
+  }, [])
+}
