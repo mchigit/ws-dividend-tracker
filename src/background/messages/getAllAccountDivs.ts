@@ -150,7 +150,8 @@ const getTradeAccountData = async (
             quantity: position.quantity,
             account_id: position.account_id,
             sec_id: position?.id,
-            accountInfo: accountInfo
+            accountInfo: accountInfo,
+            book_value: position?.book_value?.amount
           }
         }
       })

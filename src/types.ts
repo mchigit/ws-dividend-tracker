@@ -58,14 +58,49 @@ export type CashAccountInterest = {
 
 export interface FeedItem {
   accountId: string
-  amount: number
-  currency: string
-  occurredAt: string
-  type: string
-  unifiedAccountType: string
-  assetSymbol: string
+  aftOriginatorName: string | null
+  aftTransactionCategory: string | null
+  aftTransactionType: string | null
+  amount: string
+  amountSign: "positive" | "negative"
+  assetQuantity: string | null
+  assetSymbol: string | null
   canonicalId: string
-  securityId: string
+  currency: string
+  eTransferEmail: string | null
+  eTransferName: string | null
+  externalCanonicalId: string
+  identityId: string
+  institutionName: string | null
+  occurredAt: string
+  p2pHandle: string | null
+  p2pMessage: string | null
+  spendMerchant: string | null
+  securityId: string | null
+  billPayCompanyName: string | null
+  billPayPayeeNickname: string | null
+  redactedExternalAccountNumber: string | null
+  opposingAccountId: string | null
+  status: string
+  subType: string
+  type: string
+  strikePrice: string | null
+  contractType: string | null
+  expiryDate: string | null
+  chequeNumber: string | null
+  provisionalCreditAmount: string | null
+  primaryBlocker: string | null
+  interestRate: string | null
+  frequency: string | null
+  counterAssetSymbol: string | null
+  rewardProgram: string | null
+  counterPartyCurrency: string | null
+  counterPartyCurrencyAmount: string | null
+  counterPartyName: string | null
+  fxRate: string | null
+  fees: string | null
+  reference: string | null
+  __typename: string
 }
 
 export interface Account {

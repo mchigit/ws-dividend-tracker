@@ -320,3 +320,63 @@ export async function getWSSecurityFundamentals(
 
   return json
 }
+
+export async function getAccountsActivities(
+  accessToken: string,
+  accountIds: string[]
+): Promise<any[]> {
+  const data: any = {
+    operationName: "FetchActivityFeedItems",
+    cursor: undefined,
+    variables: {
+      orderBy: "OCCURRED_AT_DESC",
+      condition: {
+        accountIds: accountIds,
+        endDate: generateTimestampNow()
+      },
+      first: 50
+    },
+    query:
+      "query FetchActivityFeedItems($first: Int, $cursor: Cursor, $condition: ActivityCondition, $orderBy: [ActivitiesOrderBy!] = OCCURRED_AT_DESC) {\n  activityFeedItems(\n    first: $first\n    after: $cursor\n    condition: $condition\n    orderBy: $orderBy\n  ) {\n    edges {\n      node {\n        ...Activity\n        __typename\n      }\n      __typename\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment Activity on ActivityFeedItem {\n  accountId\n  aftOriginatorName\n  aftTransactionCategory\n  aftTransactionType\n  amount\n  amountSign\n  assetQuantity\n  assetSymbol\n  canonicalId\n  currency\n  eTransferEmail\n  eTransferName\n  externalCanonicalId\n  identityId\n  institutionName\n  occurredAt\n  p2pHandle\n  p2pMessage\n  spendMerchant\n  securityId\n  billPayCompanyName\n  billPayPayeeNickname\n  redactedExternalAccountNumber\n  opposingAccountId\n  status\n  subType\n  type\n  strikePrice\n  contractType\n  expiryDate\n  chequeNumber\n  provisionalCreditAmount\n  primaryBlocker\n  interestRate\n  frequency\n  counterAssetSymbol\n  rewardProgram\n  counterPartyCurrency\n  counterPartyCurrencyAmount\n  counterPartyName\n  fxRate\n  fees\n  reference\n  __typename\n}"
+  }
+
+  const allActivities: any[] = []
+  let nextCursor = null
+
+  do {
+    if (nextCursor) {
+      data.variables = {
+        ...data.variables,
+        cursor: nextCursor
+      }
+    }
+
+    const res = await fetch(WS_GRAPHQL_URL, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "X-Ws-Api-Version": "12",
+        "X-Ws-Profile": "trade",
+        Authorization: `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(data)
+    })
+
+    const json = await res.json()
+
+    if (!json?.data?.activityFeedItems?.edges) {
+      break
+    }
+
+    const activities = json.data.activityFeedItems.edges.map(
+      (edge) => edge.node
+    )
+    allActivities.push(...activities)
+
+    nextCursor = json.data.activityFeedItems.pageInfo.hasNextPage
+      ? json.data.activityFeedItems.pageInfo.endCursor
+      : null
+  } while (nextCursor)
+
+  return allActivities
+}

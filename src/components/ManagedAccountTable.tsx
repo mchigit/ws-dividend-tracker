@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid"
 
 import type { ManagedPosition } from "~types"
 import {
+  combinePositions,
   filterPositionsByAccount,
   formatStockWithDiv,
   sortTable
@@ -26,15 +27,17 @@ export default function ManagedAccountTable(props: {
         .toFixed(2)
     : 0
 
-  const sortedPositions = sortTable(
+  const filteredPositions = filterPositionsByAccount(
     positionWithDividends,
-    currentSort,
-    sortDirection
+    currentAccFilter
   )
 
-  const filteredPositions = filterPositionsByAccount(
-    sortedPositions,
-    currentAccFilter
+  const combinedPositions = combinePositions(filteredPositions)
+
+  const sortedPositions = sortTable(
+    combinedPositions,
+    currentSort,
+    sortDirection
   )
 
   return (
@@ -137,7 +140,7 @@ export default function ManagedAccountTable(props: {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {filteredPositions.map((position) => {
+              {sortedPositions.map((position) => {
                 const id = uuidv4()
                 return (
                   <tr key={`${position.symbol}-${id}`}>
