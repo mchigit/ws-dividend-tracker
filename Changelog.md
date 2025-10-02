@@ -1,5 +1,9 @@
 # Changelog
 
+- Fixed bugs with Cash accounts
+- Display account nicknames
+- UI change for feedback. Moved to top right corner icon button.
+
 ## v4.6.0
 
 - Added export cash transactions feature.

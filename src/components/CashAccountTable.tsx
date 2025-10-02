@@ -90,7 +90,7 @@ export default function CashAccountTable(props: {
               <th
                 scope="col"
                 className="py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900">
-                Account Type
+                Account
               </th>
               <th
                 scope="col"
@@ -121,11 +121,13 @@ export default function CashAccountTable(props: {
                 account.balance.cents / 100,
                 interestRate
               )
-              const accountName = account.accInfo.id.includes("ca-cash-corporate")
-                ? "Cash (Corporate)"
-                : account.accInfo?.accountOwnerConfiguration === "MULTI_OWNER"
-                  ? "Cash (Joint)"
-                  : "Cash"
+              const accountName = account.accInfo.nickname
+                ? account.accInfo.nickname
+                : account.accInfo.id.includes("ca-cash-corporate")
+                  ? "Cash (Corporate)"
+                  : account.accInfo?.accountOwnerConfiguration === "MULTI_OWNER"
+                    ? "Cash (Joint)"
+                    : "Cash"
               return (
                 <tr key={index}>
                   <td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900">

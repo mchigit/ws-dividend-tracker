@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
-import type { FeedItem, FilterValues } from "~types"
+import type { CashAccount, FeedItem, FilterValues } from "~types"
 import { getCookie } from "~utils/cookie"
 import {
   getAccountsActivities,
@@ -142,6 +142,34 @@ const toTitleCase = (str: string) => {
     .replace(/_/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase())
 }
+
+const getCashAccountsFromBackground = async (): Promise<{
+  cashAccounts: CashAccount[] | null
+  isOldData?: boolean
+}> => {
+  const data = await sendToBackground({ name: "getCashAccounts" })
+
+  const { cashAccounts, createdAt } = data
+
+  let isOldData = false
+  if (createdAt) {
+    const createdAtDate = new Date(createdAt)
+    const now = new Date()
+    const diff = now.getTime() - createdAtDate.getTime()
+    if (diff > DAYS_IN_MS) {
+      isOldData = true
+    }
+  }
+
+  return { cashAccounts, isOldData }
+}
+
+export const useFetchCashAccountsQuery = () =>
+  useQuery({
+    queryKey: ["fetchCashAccounts"],
+    queryFn: getCashAccountsFromBackground,
+    refetchOnWindowFocus: false
+  })
 
 export const useExportCashTransactionsQuery = () =>
   useMutation({

@@ -381,3 +381,65 @@ export async function getAccountsActivities(
 
   return allActivities
 }
+
+export async function fetchIdentityPositions(
+  accessToken: string,
+  identityId: string
+): Promise<any> {
+  const response = await fetch(WS_GRAPHQL_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "X-Ws-Api-Version": "12",
+      "X-Ws-Profile": "trade",
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({
+      operationName: "FetchIdentityPositions",
+      variables: {
+        includeSecurity: true,
+        includeAccountData: true,
+        includeOneDayReturnsBaseline: true,
+        includeUnrealizedReturnsBaseline: true,
+        identityId: identityId,
+        currency: "CAD",
+        currencyOverride: "MARKET",
+        aggregated: false,
+        first: 500
+      },
+      query:
+        "query FetchIdentityPositions($identityId: ID!, $currency: Currency!, $first: Int, $cursor: String, $accountIds: [ID!], $aggregated: Boolean, $currencyOverride: CurrencyOverride, $sort: PositionSort, $sortDirection: PositionSortDirection, $filter: PositionFilter, $since: PointInTime, $includeSecurity: Boolean = false, $includeAccountData: Boolean = false, $includeOneDayReturnsBaseline: Boolean = false, $includeUnrealizedReturnsBaseline: Boolean = false, $unrealizedReturnsBaselineStartDate: Date) {\n  identity(id: $identityId) {\n    id\n    financials(filter: {accounts: $accountIds}) {\n      current(currency: $currency) {\n        id\n        positions(\n          first: $first\n          after: $cursor\n          aggregated: $aggregated\n          filter: $filter\n          sort: $sort\n          sortDirection: $sortDirection\n        ) {\n          edges {\n            node {\n              ...PositionV2\n              __typename\n            }\n            __typename\n          }\n          pageInfo {\n            hasNextPage\n            endCursor\n            __typename\n          }\n          totalCount\n          status\n          hasOptionsPosition\n          hasCryptoPositionsOnly\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment SecuritySummary on Security {\n  ...SecuritySummaryDetails\n  stock {\n    ...StockSummary\n    __typename\n  }\n  quoteV2(currency: null) {\n    ...SecurityQuoteV2\n    __typename\n  }\n  optionDetails {\n    ...OptionSummary\n    __typename\n  }\n  __typename\n}\n\nfragment SecuritySummaryDetails on Security {\n  id\n  currency\n  inactiveDate\n  status\n  wsTradeEligible\n  equityTradingSessionType\n  securityType\n  active\n  securityGroups {\n    id\n    name\n    __typename\n  }\n  features\n  logoUrl\n  __typename\n}\n\nfragment StockSummary on Stock {\n  name\n  symbol\n  primaryMic\n  primaryExchange\n  __typename\n}\n\nfragment StreamedSecurityQuoteV2 on UnifiedQuote {\n  __typename\n  securityId\n  ask\n  bid\n  currency\n  price\n  sessionPrice\n  quotedAsOf\n  ... on EquityQuote {\n    marketStatus\n    askSize\n    bidSize\n    close\n    high\n    last\n    lastSize\n    low\n    open\n    mid\n    volume: vol\n    __typename\n  }\n  ... on OptionQuote {\n    marketStatus\n    askSize\n    bidSize\n    close\n    high\n    last\n    lastSize\n    low\n    open\n    mid\n    volume: vol\n    breakEven\n    inTheMoney\n    liquidityStatus\n    openInterest\n    underlyingSpot\n    __typename\n  }\n}\n\nfragment SecurityQuoteV2 on UnifiedQuote {\n  ...StreamedSecurityQuoteV2\n  previousBaseline\n  __typename\n}\n\nfragment OptionSummary on Option {\n  underlyingSecurity {\n    ...UnderlyingSecuritySummary\n    __typename\n  }\n  maturity\n  osiSymbol\n  expiryDate\n  multiplier\n  optionType\n  strikePrice\n  __typename\n}\n\nfragment UnderlyingSecuritySummary on Security {\n  id\n  stock {\n    name\n    primaryExchange\n    primaryMic\n    symbol\n    __typename\n  }\n  __typename\n}\n\nfragment PositionV2 on PositionV2 {\n  id\n  quantity\n  accounts @include(if: $includeAccountData) {\n    id\n    __typename\n  }\n  percentageOfAccount\n  positionDirection\n  bookValue {\n    amount\n    currency\n    __typename\n  }\n  averagePrice {\n    amount\n    currency\n    __typename\n  }\n  marketAveragePrice: averagePrice(currencyOverride: $currencyOverride) {\n    amount\n    currency\n    __typename\n  }\n  marketBookValue: bookValue(currencyOverride: $currencyOverride) {\n    amount\n    currency\n    __typename\n  }\n  totalValue(currencyOverride: $currencyOverride) {\n    amount\n    currency\n    __typename\n  }\n  unrealizedReturns(since: $since) {\n    amount\n    currency\n    __typename\n  }\n  marketUnrealizedReturns: unrealizedReturns(currencyOverride: $currencyOverride) {\n    amount\n    currency\n    __typename\n  }\n  security {\n    id\n    ...SecuritySummary @include(if: $includeSecurity)\n    __typename\n  }\n  oneDayReturnsBaseline(currencyOverride: $currencyOverride) @include(if: $includeOneDayReturnsBaseline) {\n    amount\n    currency\n    __typename\n  }\n  unrealizedReturnsBaseline(\n    currencyOverride: $currencyOverride\n    startDate: $unrealizedReturnsBaselineStartDate\n  ) @include(if: $includeUnrealizedReturnsBaseline) {\n    amount\n    currency\n    __typename\n  }\n  __typename\n}"
+    })
+  })
+
+  const json = await response.json()
+  return json
+}
+
+export async function fetchAllAccounts(
+  accessToken: string,
+  identityId: string
+): Promise<any> {
+  const response = await fetch(WS_GRAPHQL_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "X-Ws-Api-Version": "12",
+      "X-Ws-Profile": "trade",
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({
+      operationName: "FetchAllAccounts",
+      variables: {
+        filter: {},
+        pageSize: 25,
+        identityId: identityId
+      },
+      query:
+        "query FetchAllAccounts($identityId: ID!, $filter: AccountsFilter = {}, $pageSize: Int = 25, $cursor: String) {\n  identity(id: $identityId) {\n    id\n    ...AllAccounts\n    __typename\n  }\n}\n\nfragment AllAccounts on Identity {\n  accounts(filter: $filter, first: $pageSize, after: $cursor) {\n    pageInfo {\n      hasNextPage\n      endCursor\n      __typename\n    }\n    edges {\n      cursor\n      node {\n        ...AccountWithLink\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment AccountWithLink on Account {\n  ...Account\n  linkedAccount {\n    ...Account\n    __typename\n  }\n  __typename\n}\n\nfragment Account on Account {\n  ...AccountCore\n  custodianAccounts {\n    ...CustodianAccount\n    __typename\n  }\n  __typename\n}\n\nfragment AccountCore on Account {\n  id\n  archivedAt\n  branch\n  closedAt\n  createdAt\n  cacheExpiredAt\n  currency\n  requiredIdentityVerification\n  unifiedAccountType\n  supportedCurrencies\n  compatibleCurrencies\n  nickname\n  status\n  applicationFamilyId\n  accountOwnerConfiguration\n  accountFeatures {\n    ...AccountFeature\n    __typename\n  }\n  accountOwners {\n    ...AccountOwner\n    __typename\n  }\n  accountEntityRelationships {\n    ...AccountEntityRelationship\n    __typename\n  }\n  accountUpgradeProcesses {\n    ...AccountUpgradeProcess\n    __typename\n  }\n  type\n  __typename\n}\n\nfragment AccountFeature on AccountFeature {\n  name\n  enabled\n  functional\n  firstEnabledOn\n  __typename\n}\n\nfragment AccountOwner on AccountOwner {\n  accountId\n  identityId\n  accountNickname\n  clientCanonicalId\n  accountOpeningAgreementsSigned\n  name\n  email\n  ownershipType\n  activeInvitation {\n    ...AccountOwnerInvitation\n    __typename\n  }\n  sentInvitations {\n    ...AccountOwnerInvitation\n    __typename\n  }\n  __typename\n}\n\nfragment AccountOwnerInvitation on AccountOwnerInvitation {\n  id\n  createdAt\n  inviteeName\n  inviteeEmail\n  inviterName\n  inviterEmail\n  updatedAt\n  sentAt\n  status\n  __typename\n}\n\nfragment AccountEntityRelationship on AccountEntityRelationship {\n  accountCanonicalId\n  entityCanonicalId\n  entityOwnershipType\n  entityType\n  __typename\n}\n\nfragment AccountUpgradeProcess on AccountUpgradeProcess {\n  canonicalId\n  status\n  targetAccountType\n  __typename\n}\n\nfragment CustodianAccount on CustodianAccount {\n  id\n  branch\n  custodian\n  status\n  updatedAt\n  __typename\n}"
+    })
+  })
+
+  const json = await response.json()
+  return json
+}

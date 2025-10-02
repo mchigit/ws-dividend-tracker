@@ -7,8 +7,16 @@ import { CircularPagination } from "./Pagination"
 
 const PAGE_SIZE = 10
 
-export default function DivHistory(props: { data: FeedItem[] }) {
-  const { data } = props
+export default function DivHistory(props: {
+  data: FeedItem[]
+  accountsInfo?: Array<{
+    id: string
+    type: string
+    unifiedAccountType: string
+    nickname?: string
+  }>
+}) {
+  const { data, accountsInfo } = props
   const [page, setPage] = React.useState(1)
 
   const slicedData = data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -17,6 +25,14 @@ export default function DivHistory(props: { data: FeedItem[] }) {
   useEffect(() => {
     setPage(1)
   }, [data])
+
+  const getAccountDisplayName = (accountId: string, unifiedAccountType: string) => {
+    const accountInfo = accountsInfo?.find((acc) => acc.id === accountId)
+    if (accountInfo?.nickname) {
+      return accountInfo.nickname
+    }
+    return getAccountName(accountId, unifiedAccountType)
+  }
 
   return (
     <>
@@ -62,7 +78,7 @@ export default function DivHistory(props: { data: FeedItem[] }) {
                   </dd>
                   <dt className="sr-only sm:hidden">Account</dt>
                   <dd className="mt-1 truncate text-gray-500 sm:hidden">
-                    {getAccountName(item.accountId, item.unifiedAccountType)}
+                    {getAccountDisplayName(item.accountId, item.unifiedAccountType)}
                   </dd>
                 </dl>
               </td>
@@ -70,7 +86,7 @@ export default function DivHistory(props: { data: FeedItem[] }) {
                 {item.assetSymbol}
               </td>
               <td className="hidden px-3 py-4 text-sm text-gray-500 lg:table-cell">
-                {getAccountName(item.accountId, item.unifiedAccountType)}
+                {getAccountDisplayName(item.accountId, item.unifiedAccountType)}
               </td>
               <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
                 {item.type}

@@ -11,7 +11,7 @@ import DivHistory from "~components/DivHistory"
 import Header from "~components/Header"
 import NeedLoginBanner from "~components/NeedLoginBanner"
 import OldDataBanner from "~components/OldDataBanner"
-import { useFetchDivDetailsQuery } from "~queries"
+import { useFetchCashAccountsQuery, useFetchDivDetailsQuery } from "~queries"
 import type { FeedItem } from "~types"
 import { ACC_TYPES, getAccountName, HISTORY_FILTERS } from "~utils/shared"
 
@@ -210,6 +210,9 @@ function WsDividendDetails() {
   )
 
   const { data, isLoading } = useFetchDivDetailsQuery()
+  const { data: cashAccountsData } = useFetchCashAccountsQuery()
+
+  console.log("Cash Accounts Data:", cashAccountsData)
 
   const filteredFeedItems = filterFeedItems(
     data?.feedItems || [],
@@ -338,7 +341,10 @@ function WsDividendDetails() {
               </div>
             )}
             {filteredFeedItems.length > 0 && (
-              <DivHistory data={filteredFeedItems} />
+              <DivHistory
+                data={filteredFeedItems}
+                accountsInfo={data?.filterValues?.uniqueAccs}
+              />
             )}
           </div>
         </>

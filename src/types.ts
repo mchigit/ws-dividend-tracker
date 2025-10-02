@@ -124,6 +124,7 @@ export type FilterValues = {
     id: string
     type: string
     unifiedAccountType: string
+    nickname?: string
   }>
   symbols: string[]
 }

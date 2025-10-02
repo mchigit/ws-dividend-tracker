@@ -13,7 +13,7 @@ const AccountFilter = ({ data, onFilterChange }) => {
     return {
       id: accountId,
       type: accountInfo?.type?.toUpperCase() || "",
-      nickname: accountInfo?.nickname || accountId,
+      nickname: accountInfo?.nickname || null,
       unifiedAccountType: accountInfo?.unifiedAccountType,
       currency: accountInfo?.currency
     }
@@ -88,13 +88,10 @@ const AccountFilter = ({ data, onFilterChange }) => {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                {/* <p className="text-sm font-medium text-gray-900 truncate">
-                  {account.nickname}
-                </p>
-                <p className="text-xs text-gray-500 truncate">{account.type}</p> */}
                 <p className="text-xs font-medium text-gray-900 truncate">
-                  {formatUnifiedAccountType(account.unifiedAccountType)} -{" "}
-                  {account.currency}
+                  {account.nickname
+                    ? account.nickname
+                    : `${formatUnifiedAccountType(account.unifiedAccountType)} - ${account.currency}`}
                 </p>
               </div>
             </label>

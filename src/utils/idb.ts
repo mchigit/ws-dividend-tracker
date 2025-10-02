@@ -127,7 +127,8 @@ export async function getFilterValsFromDB(): Promise<FilterValues> {
         return {
           id: acc.id,
           type: acc.type,
-          unifiedAccountType: acc.unifiedAccountType
+          unifiedAccountType: acc.unifiedAccountType,
+          nickname: acc.nickname
         }
       }
 
