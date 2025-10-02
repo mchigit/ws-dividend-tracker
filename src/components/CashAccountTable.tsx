@@ -20,6 +20,15 @@ export default function CashAccountTable(props: {
     checkCookie()
   }, [])
 
+  // Helper function to get the correct interest rate based on currency
+  const getInterestRate = (account: CashAccount) => {
+    const currency = account.balance.currency
+    const appliedRates = account.interestRate.appliedRates
+    return currency === "USD"
+      ? appliedRates.usdInterestRate
+      : appliedRates.cadInterestRate
+  }
+
   const totalBalance = cashAccounts.reduce(
     (acc, account) => acc + account.balance.cents / 100,
     0
@@ -28,17 +37,15 @@ export default function CashAccountTable(props: {
   const totalYearlyInterest = cashAccounts.reduce((acc, account) => {
     return (
       acc +
-      getYearlyTotal(
-        account.balance.cents / 100,
-        parseFloat(account.interestRate.interestRate)
-      )
+      getYearlyTotal(account.balance.cents / 100, getInterestRate(account))
     )
   }, 0)
 
   const cashAccountsData = cashAccounts.map((account) => ({
     id: account.accInfo.id,
-    name:
-      account.accInfo?.accountOwnerConfiguration === "MULTI_OWNER"
+    name: account.accInfo.id.includes("ca-cash-corporate")
+      ? "Cash (Corporate)"
+      : account.accInfo?.accountOwnerConfiguration === "MULTI_OWNER"
         ? "Cash (Joint)"
         : "Cash",
     nickname: account.accInfo?.nickname || ""
@@ -109,27 +116,26 @@ export default function CashAccountTable(props: {
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
             {cashAccounts.map((account, index) => {
+              const interestRate = getInterestRate(account)
               const yearlyInterest = getYearlyTotal(
                 account.balance.cents / 100,
-                parseFloat(account.interestRate.interestRate)
+                interestRate
               )
+              const accountName = account.accInfo.id.includes("ca-cash-corporate")
+                ? "Cash (Corporate)"
+                : account.accInfo?.accountOwnerConfiguration === "MULTI_OWNER"
+                  ? "Cash (Joint)"
+                  : "Cash"
               return (
                 <tr key={index}>
                   <td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
-                    Cash{" "}
-                    {account?.accInfo?.accountOwnerConfiguration ===
-                    "MULTI_OWNER"
-                      ? "(Joint)"
-                      : ""}
+                    {accountName}
                   </td>
                   <td className="px-3 py-4 text-sm text-gray-500">
                     ${(account.balance.cents / 100).toFixed(2)}
                   </td>
                   <td className="px-3 py-4 text-sm text-gray-500">
-                    {(
-                      parseFloat(account.interestRate.interestRate) * 100
-                    ).toFixed(2)}
-                    %
+                    {(interestRate * 100).toFixed(2)}%
                   </td>
                   <td className="px-3 py-4 text-sm text-gray-500">
                     ${yearlyInterest.toFixed(2)}

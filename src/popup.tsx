@@ -1,5 +1,6 @@
 import "~style.css"
 
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline"
 import {
   Alert,
   Button,
@@ -73,13 +74,26 @@ function Popup() {
   }
 
   return (
-    <div className="mx-auto text-center">
-      <h2 className="text-xl font-bold tracking-wide my-2 text-gray-900 sm:text-4xl">
-        WealthSimple Dividend Tracker
-      </h2>
-      <Button size="sm" className="shadow-sm my-3" onClick={handleOpenModal}>
-        Request a Feature
-      </Button>
+    <div className="mx-auto text-center relative">
+      <div className="relative pt-12">
+        <h2 className="text-xl font-bold tracking-wide my-2 text-gray-900 sm:text-4xl">
+          WealthSimple Dividend Tracker
+        </h2>
+
+        {/* Feedback Icon Button */}
+        <button
+          onClick={handleOpenModal}
+          className="absolute top-0 right-0 p-2 
+          text-gray-900 hover:text-gray-800 hover:bg-gray-200
+           rounded-full transition-colors group"
+          title="Send Feedback"
+          aria-label="Send Feedback">
+          <ChatBubbleLeftRightIcon className="h-5 w-5" />
+          <span className="absolute right-0 top-full mt-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            Send Feedback
+          </span>
+        </button>
+      </div>
 
       {/* Feedback Modal */}
       <Dialog open={openModal} handler={handleOpenModal} size="md">
@@ -228,7 +242,7 @@ function Popup() {
 
 export default function IndexPopup() {
   return (
-    <div className="bg-white w-[550px] p-4">
+    <div className="bg-white w-[550px] min-h-[600px] p-4">
       <QueryClientProvider client={queryClient}>
         <Popup />
       </QueryClientProvider>

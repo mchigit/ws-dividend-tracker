@@ -54,12 +54,13 @@ export default function AccountsDashboard(props: {
 
   const cashYearlyTotal = cashAccount
     ? cashAccount.reduce((total, account) => {
+        const currency = account.balance.currency
+        const interestRate =
+          currency === "USD"
+            ? account.interestRate.appliedRates.usdInterestRate
+            : account.interestRate.appliedRates.cadInterestRate
         return (
-          total +
-          getYearlyTotal(
-            account.balance.cents / 100,
-            parseFloat(account.interestRate.interestRate)
-          )
+          total + getYearlyTotal(account.balance.cents / 100, interestRate)
         )
       }, 0)
     : 0
@@ -81,7 +82,7 @@ export default function AccountsDashboard(props: {
         </dd>
       </div>
       <div className="border-b border-gray-200 mt-10">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+        <nav className="-mb-px flex justify-center space-x-8" aria-label="Tabs">
           {tabs.map((tab) => (
             <button
               key={tab.name}

@@ -5,10 +5,15 @@ export interface Balance {
   __typename: string
 }
 
+export interface AppliedCashInterestRates {
+  cadInterestRate: number
+  usdInterestRate: number
+  __typename: string
+}
+
 export interface InterestRate {
   id: string
-  interestRate: string
-  interestRateBoosted: boolean
+  appliedRates: AppliedCashInterestRates
   __typename: string
 }
 
@@ -101,6 +106,7 @@ export interface FeedItem {
   fees: string | null
   reference: string | null
   __typename: string
+  unifiedAccountType?: string
 }
 
 export interface Account {

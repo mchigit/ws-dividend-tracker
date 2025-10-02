@@ -14,12 +14,13 @@ export async function getCashAccountInterestRate(
   accessToken: string
 ) {
   const data = {
-    operationName: "FetchAccountInterestRate",
+    operationName: "FetchAccountAppliedRates",
     variables: {
-      accountId: accountId
+      accountId: accountId,
+      rateType: "CASH_INTEREST"
     },
     query:
-      "query FetchAccountInterestRate($accountId: ID!) {\n  account(id: $accountId) {\n    ...AccountInterestRate\n    __typename\n  }\n}\n\nfragment AccountInterestRate on Account {\n  id\n  interestRate: interest_rate\n  interestRateBoosted\n  __typename\n}"
+      "query FetchAccountAppliedRates($accountId: ID!, $rateType: RateType!) {\n  account(id: $accountId) {\n    id\n    ...AccountAppliedRates\n    __typename\n  }\n}\n\nfragment AccountAppliedRates on Account {\n  appliedRates(rateType: $rateType) {\n    ... on AppliedCashInterestRates {\n      cadInterestRate\n      usdInterestRate\n      __typename\n    }\n    ... on AppliedManagementFeeRate {\n      rate\n      __typename\n    }\n    ... on AppliedMarginInterestRates {\n      cadPositionRate\n      usdPositionRate\n      __typename\n    }\n    ... on AppliedFxConversionFeeRates {\n      rates {\n        transactionVolume\n        rate\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
   }
 
   const res = await fetch(WS_GRAPHQL_URL, {
@@ -27,7 +28,7 @@ export async function getCashAccountInterestRate(
     headers: {
       "content-type": "application/json",
       "X-Ws-Api-Version": "12",
-      "X-Ws-Profile": "invest",
+      "X-Ws-Profile": "trade",
       Authorization: `Bearer ${accessToken}`
     },
     body: JSON.stringify(data)
