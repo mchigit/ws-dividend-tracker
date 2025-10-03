@@ -212,7 +212,18 @@ function WsDividendDetails() {
   const { data, isLoading } = useFetchDivDetailsQuery()
   const { data: cashAccountsData } = useFetchCashAccountsQuery()
 
-  console.log("Cash Accounts Data:", cashAccountsData)
+  const projectedCashMonthlyIncome = useMemo(() => {
+    if (!cashAccountsData?.cashAccounts) return 0
+    return cashAccountsData.cashAccounts.reduce((total, account) => {
+      const balance = account.balance.cents / 100
+      const currency = account.balance.currency
+      const interestRate =
+        currency === "USD"
+          ? account.interestRate.appliedRates.usdInterestRate
+          : account.interestRate.appliedRates.cadInterestRate
+      return total + (balance * interestRate) / 12
+    }, 0)
+  }, [cashAccountsData])
 
   const filteredFeedItems = filterFeedItems(
     data?.feedItems || [],
@@ -303,6 +314,8 @@ function WsDividendDetails() {
               <DivBarChart
                 stackedGraph={graphStacked}
                 data={yearFilteredItems}
+                projectedCashMonthlyIncome={projectedCashMonthlyIncome}
+                currentYear={selectedYear}
               />
             </div>
           </>

@@ -15,35 +15,32 @@ import type { ValueType } from "tailwindcss/types/config"
 import { v4 } from "uuid"
 
 import type { FeedItem } from "~types"
+import { MONTH_NAME_MAP, MONTH_NUMBER_MAP } from "~utils/shared"
 
-function transformDataForGraph(data) {
-  const monthMap = {
-    "01": "Jan",
-    "02": "Feb",
-    "03": "Mar",
-    "04": "Apr",
-    "05": "May",
-    "06": "Jun",
-    "07": "Jul",
-    "08": "Aug",
-    "09": "Sep",
-    "10": "Oct",
-    "11": "Nov",
-    "12": "Dec"
-  }
-
+function transformDataForGraph(
+  data,
+  projectedCashMonthlyIncome?: number,
+  currentYear?: number
+) {
   const aggregatedData = {}
+  const now = new Date()
+  const currentMonth = now.getMonth() + 1 // 1-12
+  const currentYearNum = now.getFullYear()
+  const isCurrentYear = currentYear === currentYearNum
 
   data.forEach((item) => {
     const date = new Date(item.occurredAt)
-    const month = monthMap[date.toISOString().slice(5, 7)]
+    const month = MONTH_NUMBER_MAP[date.toISOString().slice(5, 7)]
 
     if (!aggregatedData[month]) {
       aggregatedData[month] = {
         name: month,
         "Cash Interest": 0,
         "Self Directed Dividends": 0,
-        "Managed Dividends": 0
+        "Managed Dividends": 0,
+        "Cash Interest (Projected)": 0,
+        "Self Directed Dividends (Projected)": 0,
+        "Managed Dividends (Projected)": 0
       }
     }
 
@@ -60,15 +57,27 @@ function transformDataForGraph(data) {
     }
   })
 
-  return Object.keys(monthMap)
+  return Object.keys(MONTH_NUMBER_MAP)
     .sort()
-    .map((key) => {
-      const month = monthMap[key]
+    .map((key, index) => {
+      const month = MONTH_NUMBER_MAP[key]
+      const monthNumber = index + 1
       const monthData = aggregatedData[month] || {
         name: month,
         "Cash Interest": 0,
         "Self Directed Dividends": 0,
-        "Managed Dividends": 0
+        "Managed Dividends": 0,
+        "Cash Interest (Projected)": 0,
+        "Self Directed Dividends (Projected)": 0,
+        "Managed Dividends (Projected)": 0
+      }
+
+      // Add projected data for future months in the current year
+      const isFutureMonth = isCurrentYear && monthNumber > currentMonth
+      if (isFutureMonth && projectedCashMonthlyIncome) {
+        monthData["Cash Interest (Projected)"] = parseFloat(
+          projectedCashMonthlyIncome.toFixed(2)
+        )
       }
 
       monthData["Cash Interest"] = parseFloat(
@@ -91,15 +100,32 @@ const CustomTooltip = ({
   label
 }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
-    const totalDiv = payload.reduce((acc, item) => {
+    // Determine if this is a future month
+    const now = new Date()
+    const currentMonth = now.getMonth() + 1
+    const hoveredMonth = MONTH_NAME_MAP[label as string]
+    const isFutureMonth = hoveredMonth > currentMonth
+
+    // Filter payload based on whether it's a future month
+    const filteredPayload = payload.filter((item) => {
+      const isProjected = item.dataKey.toString().includes("(Projected)")
+      // For future months, only show projected. For current/past, only show actual
+      return isFutureMonth ? isProjected : !isProjected
+    })
+
+    const totalDiv = filteredPayload.reduce((acc, item) => {
       return acc + parseFloat(item.value)
     }, 0)
 
     return (
       <div className="overflow-hidden rounded-lg bg-white shadow w-60 p-4">
         <p className="mb-4 text-lg font-semibold">{`${label}`}</p>
-        {payload.map((item) => {
-          return <p key={`${v4()}`}>{`${item.dataKey} : $${item.value}`}</p>
+        {filteredPayload.map((item) => {
+          const isProjected = item.dataKey.toString().includes("(Projected)")
+          const displayValue = isProjected
+            ? `${item.dataKey} : $${item.value} (Est.)`
+            : `${item.dataKey} : $${item.value}`
+          return <p key={`${v4()}`}>{displayValue}</p>
         })}
         {/* <p className="intro">{JSON.stringify(payload)}</p> */}
         <p className="mt-4 font-semibold">Total: ${totalDiv.toFixed(2)}</p>
@@ -114,9 +140,15 @@ export default function DivBarChart(props: {
   data: FeedItem[]
   byAccType?: boolean
   stackedGraph?: boolean
+  projectedCashMonthlyIncome?: number
+  currentYear?: number
 }) {
-  const { data, stackedGraph } = props
-  const allData = transformDataForGraph(data)
+  const { data, stackedGraph, projectedCashMonthlyIncome, currentYear } = props
+  const allData = transformDataForGraph(
+    data,
+    projectedCashMonthlyIncome,
+    currentYear
+  )
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -139,19 +171,34 @@ export default function DivBarChart(props: {
           dataKey="Cash Interest"
           fill="#323030"
           stackId={stackedGraph ? "a" : undefined}
-          // activeBar={<Rectangle fill="pink" stroke="blue" />}
         />
         <Bar
           dataKey="Self Directed Dividends"
           fill="#78b2b2"
           stackId={stackedGraph ? "a" : undefined}
-          // activeBar={<Rectangle fill="blue" stroke="blue" />}
         />
         <Bar
           dataKey="Managed Dividends"
           fill="#f7c359"
           stackId={stackedGraph ? "a" : undefined}
-          // activeBar={<Rectangle fill="blue" stroke="blue" />}
+        />
+        <Bar
+          dataKey="Cash Interest (Projected)"
+          fill="#323030"
+          fillOpacity={0.4}
+          stackId={stackedGraph ? "a" : undefined}
+        />
+        <Bar
+          dataKey="Self Directed Dividends (Projected)"
+          fill="#78b2b2"
+          fillOpacity={0.4}
+          stackId={stackedGraph ? "a" : undefined}
+        />
+        <Bar
+          dataKey="Managed Dividends (Projected)"
+          fill="#f7c359"
+          fillOpacity={0.4}
+          stackId={stackedGraph ? "a" : undefined}
         />
       </BarChart>
     </ResponsiveContainer>

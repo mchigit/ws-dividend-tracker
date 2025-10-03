@@ -109,6 +109,36 @@ export const ACC_TYPES = {
   MANAGED: "Managed"
 }
 
+export const MONTH_NUMBER_MAP = {
+  "01": "Jan",
+  "02": "Feb",
+  "03": "Mar",
+  "04": "Apr",
+  "05": "May",
+  "06": "Jun",
+  "07": "Jul",
+  "08": "Aug",
+  "09": "Sep",
+  "10": "Oct",
+  "11": "Nov",
+  "12": "Dec"
+} as const
+
+export const MONTH_NAME_MAP = {
+  Jan: 1,
+  Feb: 2,
+  Mar: 3,
+  Apr: 4,
+  May: 5,
+  Jun: 6,
+  Jul: 7,
+  Aug: 8,
+  Sep: 9,
+  Oct: 10,
+  Nov: 11,
+  Dec: 12
+} as const
+
 export function sortTable(
   positions: FormattedStockWithDiv[],
   sortBy: string,
