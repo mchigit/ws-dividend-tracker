@@ -187,18 +187,21 @@ export default function DivBarChart(props: {
           fill="#323030"
           fillOpacity={0.4}
           stackId={stackedGraph ? "a" : undefined}
+          legendType="none"
         />
         <Bar
           dataKey="Self Directed Dividends (Projected)"
           fill="#78b2b2"
           fillOpacity={0.4}
           stackId={stackedGraph ? "a" : undefined}
+          legendType="none"
         />
         <Bar
           dataKey="Managed Dividends (Projected)"
           fill="#f7c359"
           fillOpacity={0.4}
           stackId={stackedGraph ? "a" : undefined}
+          legendType="none"
         />
       </BarChart>
     </ResponsiveContainer>

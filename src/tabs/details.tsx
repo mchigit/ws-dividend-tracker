@@ -4,7 +4,6 @@ import { Switch } from "@headlessui/react"
 import { Spinner } from "@material-tailwind/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import React, { useMemo, useState } from "react"
-import Select from "react-select"
 
 import DivBarChart from "~components/DivBarChart"
 import DivHistory from "~components/DivHistory"
@@ -13,7 +12,7 @@ import NeedLoginBanner from "~components/NeedLoginBanner"
 import OldDataBanner from "~components/OldDataBanner"
 import { useFetchCashAccountsQuery, useFetchDivDetailsQuery } from "~queries"
 import type { FeedItem } from "~types"
-import { ACC_TYPES, getAccountName, HISTORY_FILTERS } from "~utils/shared"
+import { HISTORY_FILTERS } from "~utils/shared"
 
 const queryClient = new QueryClient()
 
@@ -23,150 +22,6 @@ const getTotalAmount = (items: FeedItem[]) => {
   }, 0)
 
   return total.toFixed(2)
-}
-
-function FilterBySymbolDropdown(props: {
-  activeFilter: Record<string, string[]>
-  setActiveFilter: React.Dispatch<
-    React.SetStateAction<Record<string, string[]>>
-  >
-  symbols: string[]
-}) {
-  const { activeFilter, setActiveFilter, symbols } = props
-
-  const allSymbols = symbols.map((item) => ({
-    label: item,
-    value: item
-  }))
-
-  return (
-    <div className="flex flex-col gap-y-2 w-full">
-      <label className="text-lg font-semibold">Filter by Symbol</label>
-      <Select
-        defaultValue={allSymbols.filter((item) =>
-          activeFilter[HISTORY_FILTERS.BY_ASSET]?.includes(item.value)
-        )}
-        closeMenuOnSelect={false}
-        isMulti={true}
-        name="Filter By Symbol"
-        options={allSymbols as any}
-        placeholder="Select Symbol"
-        onChange={(selected) => {
-          setActiveFilter({
-            ...activeFilter,
-            [HISTORY_FILTERS.BY_ASSET]: selected.map((item: any) => item.value)
-          })
-        }}
-        isClearable={false}
-        styles={{
-          container: (baseStyles) => ({
-            ...baseStyles,
-            width: "100%"
-          })
-        }}
-      />
-    </div>
-  )
-}
-
-function FilterByAccDropdown(props: {
-  activeFilter: Record<string, string[]>
-  setActiveFilter: React.Dispatch<
-    React.SetStateAction<Record<string, string[]>>
-  >
-  uniqueAccs: Array<{
-    id: string
-    type: string
-    unifiedAccountType: string
-  }>
-}) {
-  const { activeFilter, setActiveFilter, uniqueAccs } = props
-  const allAccounts = uniqueAccs.map((item) => ({
-    label: getAccountName(item.id, item.unifiedAccountType),
-    value: item.id
-  }))
-
-  return (
-    <div className="flex flex-col gap-y-2 w-full">
-      <label className="text-lg font-semibold">Filter by Account</label>
-      <Select
-        defaultValue={allAccounts.filter((item) =>
-          activeFilter[HISTORY_FILTERS.BY_ACCOUNT]?.includes(item.value)
-        )}
-        closeMenuOnSelect={false}
-        isMulti={true}
-        name="Filter By Account"
-        options={allAccounts as any}
-        placeholder="Select Account"
-        onChange={(selected) => {
-          setActiveFilter({
-            ...activeFilter,
-            [HISTORY_FILTERS.BY_ACCOUNT]: selected.map(
-              (item: any) => item.value
-            )
-          })
-        }}
-        isClearable={false}
-        styles={{
-          container: (baseStyles) => ({
-            ...baseStyles,
-            width: "100%"
-          })
-        }}
-      />
-    </div>
-  )
-}
-
-function FilterByAccTypeDropdown(props: {
-  activeFilter: Record<string, string[]>
-  setActiveFilter: React.Dispatch<
-    React.SetStateAction<Record<string, string[]>>
-  >
-  dataItems?: FeedItem[]
-}) {
-  const { activeFilter, setActiveFilter } = props
-  const allAccTypes = Object.keys(ACC_TYPES).map((key) => ({
-    label: ACC_TYPES[key],
-    value: key
-  }))
-
-  allAccTypes.unshift({ label: "All", value: "all" })
-
-  return (
-    <div className="flex flex-col gap-y-2 w-full">
-      <label className="text-lg font-semibold">Filter by Account Type</label>
-      <Select
-        defaultValue={allAccTypes.filter((item) =>
-          activeFilter[HISTORY_FILTERS.BY_ACC_TYPE]?.includes(item.value)
-        )}
-        closeMenuOnSelect={true}
-        name="Filter By Account Type"
-        options={allAccTypes as any}
-        placeholder="Select Account Type"
-        onChange={(selected) => {
-          if (selected.value === "all") {
-            setActiveFilter({
-              ...activeFilter,
-              [HISTORY_FILTERS.BY_ACC_TYPE]: []
-            })
-            return
-          }
-          setActiveFilter({
-            ...activeFilter,
-            [HISTORY_FILTERS.BY_ACC_TYPE]: [selected.value]
-          })
-        }}
-        isClearable={false}
-        styles={{
-          container: (baseStyles) => ({
-            ...baseStyles,
-            width: "100%"
-          })
-        }}
-      />
-    </div>
-  )
 }
 
 function filterFeedItems(
@@ -324,39 +179,31 @@ function WsDividendDetails() {
         <>
           <h1 className="text-3xl font-bold mt-10">History</h1>
           <div className="w-full flex items-center justify-start flex-col">
-            <div className="grid grid-cols-3 gap-6 w-full my-8">
-              {data?.filterValues && (
-                <>
-                  <FilterBySymbolDropdown
-                    activeFilter={activeFilters}
-                    setActiveFilter={setActiveFilters}
-                    symbols={data.filterValues.symbols}
-                  />
-                  <FilterByAccDropdown
-                    activeFilter={activeFilters}
-                    setActiveFilter={setActiveFilters}
-                    uniqueAccs={data.filterValues.uniqueAccs}
-                  />
-                  <FilterByAccTypeDropdown
-                    activeFilter={activeFilters}
-                    setActiveFilter={setActiveFilters}
-                  />
-                </>
-              )}
-            </div>
-            {!isLoading && filteredFeedItems.length === 0 && (
-              <div className="overflow-hidden rounded-lg bg-gray-200 !w-[500px]">
-                <div className="px-4 py-5 sm:p-6 flex items-center justify-center w-full">
-                  <p className="text-md">
-                    No data found for the selected filters.
-                  </p>
+            {!isLoading && filteredFeedItems.length === 0 && data?.filterValues && (
+              <>
+                <DivHistory
+                  data={[]}
+                  accountsInfo={data?.filterValues?.uniqueAccs}
+                  filterValues={data.filterValues}
+                  activeFilters={activeFilters}
+                  setActiveFilters={setActiveFilters}
+                />
+                <div className="overflow-hidden rounded-lg bg-gray-200 !w-[500px]">
+                  <div className="px-4 py-5 sm:p-6 flex items-center justify-center w-full">
+                    <p className="text-md">
+                      No data found for the selected filters.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
-            {filteredFeedItems.length > 0 && (
+            {filteredFeedItems.length > 0 && data?.filterValues && (
               <DivHistory
                 data={filteredFeedItems}
                 accountsInfo={data?.filterValues?.uniqueAccs}
+                filterValues={data.filterValues}
+                activeFilters={activeFilters}
+                setActiveFilters={setActiveFilters}
               />
             )}
           </div>
