@@ -170,9 +170,9 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log("Received a message from the content script:", req)
 
   try {
-    // const storedData = await storage.get("ws-div-data")
+    const storedData = await storage.get("ws-div-data")
 
-    const storedData = null
+    // const storedData = null
 
     const cookie = await getCookie()
 
