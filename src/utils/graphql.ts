@@ -413,7 +413,7 @@ export async function fetchIdentityPositions(
   })
 
   const json = await response.json()
-  return json
+  return json?.data?.identity?.financials?.current?.positions?.edges || []
 }
 
 export async function fetchAllAccounts(

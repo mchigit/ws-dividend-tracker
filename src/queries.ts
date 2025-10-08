@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 
 import { sendToBackground } from "@plasmohq/messaging"
 
-import type { CashAccount, FeedItem, FilterValues } from "~types"
+import type { CashAccount, FeedItem, FilterValues, PositionEdge } from "~types"
 import { getCookie } from "~utils/cookie"
 import {
   getAccountsActivities,
@@ -15,6 +15,7 @@ import {
   syncDivTransactionInDB,
   writeDataToDB
 } from "~utils/idb"
+import { getDivFrequencyForSymbols } from "~utils/stocks"
 import { formatAllAccFiniancialData } from "~utils/wealthsimple"
 
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
@@ -168,6 +169,55 @@ export const useFetchCashAccountsQuery = () =>
   useQuery({
     queryKey: ["fetchCashAccounts"],
     queryFn: getCashAccountsFromBackground,
+    refetchOnWindowFocus: false
+  })
+
+const getIdentityPositionsFromBackground = async (): Promise<{
+  positions: PositionEdge[] | null
+  isOldData?: boolean
+}> => {
+  const data = await sendToBackground({ name: "getIdentityPositions" })
+
+  const { positions, createdAt, error } = data
+
+  if (error || !positions) {
+    return { positions: null, isOldData: false }
+  }
+
+  let isOldData = false
+  if (createdAt) {
+    const createdAtDate = new Date(createdAt)
+    const now = new Date()
+    const diff = now.getTime() - createdAtDate.getTime()
+    if (diff > DAYS_IN_MS) {
+      isOldData = true
+    }
+  }
+
+  // Filter out OPTION securities and only keep equity/ETF positions
+  const filteredPositions = positions.filter(
+    (edge: PositionEdge) => edge.node.security.securityType !== "OPTION"
+  )
+
+  console.log("Filtered positions:", filteredPositions)
+
+  if (filteredPositions && filteredPositions.length > 0) {
+    const allSymbols = filteredPositions
+      .map((position) => position?.node.security.stock.symbol)
+      .filter((symbol) => !!symbol)
+
+    const allDivFrequencies = await getDivFrequencyForSymbols(allSymbols)
+
+    console.log("All dividend frequencies:", allDivFrequencies)
+  }
+
+  return { positions: filteredPositions, isOldData }
+}
+
+export const useFetchIdentityPositionsQuery = () =>
+  useQuery({
+    queryKey: ["fetchIdentityPositions"],
+    queryFn: getIdentityPositionsFromBackground,
     refetchOnWindowFocus: false
   })
 

@@ -132,3 +132,55 @@ export type FilterValues = {
 export interface CashAccounts {
   cashAccounts: CashAccount[]
 }
+
+export interface PositionNode {
+  id: string
+  quantity: string
+  accounts: Array<{
+    id: string
+    __typename: string
+  }>
+  percentageOfAccount: string
+  positionDirection: string
+  bookValue: {
+    amount: string
+    currency: string
+    __typename: string
+  }
+  averagePrice: {
+    amount: string
+    currency: string
+    __typename: string
+  }
+  totalValue: {
+    amount: string
+    currency: string
+    __typename: string
+  }
+  unrealizedReturns: {
+    amount: string
+    currency: string
+    __typename: string
+  }
+  security: {
+    id: string
+    currency: string
+    securityType: string
+    stock: {
+      name: string
+      symbol: string
+      primaryExchange: string | null
+      primaryMic: string | null
+      __typename: string
+    }
+    quoteV2: any
+    optionDetails: any | null
+    __typename: string
+  }
+  __typename: string
+}
+
+export interface PositionEdge {
+  __typename: "PositionEdge"
+  node: PositionNode
+}

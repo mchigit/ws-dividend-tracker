@@ -10,7 +10,11 @@ import DivHistory from "~components/DivHistory"
 import Header from "~components/Header"
 import NeedLoginBanner from "~components/NeedLoginBanner"
 import OldDataBanner from "~components/OldDataBanner"
-import { useFetchCashAccountsQuery, useFetchDivDetailsQuery } from "~queries"
+import {
+  useFetchCashAccountsQuery,
+  useFetchDivDetailsQuery,
+  useFetchIdentityPositionsQuery
+} from "~queries"
 import type { FeedItem } from "~types"
 import { HISTORY_FILTERS } from "~utils/shared"
 
@@ -66,6 +70,18 @@ function WsDividendDetails() {
 
   const { data, isLoading } = useFetchDivDetailsQuery()
   const { data: cashAccountsData } = useFetchCashAccountsQuery()
+  // const { data: identityPositionsData } = useFetchIdentityPositionsQuery()
+
+  // console.log("Identity Positions Data:", identityPositionsData)
+  // console.log(
+  //   "Position Securities:",
+  //   identityPositionsData?.positions?.map((edge) => ({
+  //     symbol: edge.node.security.stock.symbol,
+  //     name: edge.node.security.stock.name,
+  //     quantity: edge.node.quantity,
+  //     totalValue: edge.node.totalValue
+  //   }))
+  // )
 
   const projectedCashMonthlyIncome = useMemo(() => {
     if (!cashAccountsData?.cashAccounts) return 0
@@ -179,24 +195,26 @@ function WsDividendDetails() {
         <>
           <h1 className="text-3xl font-bold mt-10">History</h1>
           <div className="w-full flex items-center justify-start flex-col">
-            {!isLoading && filteredFeedItems.length === 0 && data?.filterValues && (
-              <>
-                <DivHistory
-                  data={[]}
-                  accountsInfo={data?.filterValues?.uniqueAccs}
-                  filterValues={data.filterValues}
-                  activeFilters={activeFilters}
-                  setActiveFilters={setActiveFilters}
-                />
-                <div className="overflow-hidden rounded-lg bg-gray-200 !w-[500px]">
-                  <div className="px-4 py-5 sm:p-6 flex items-center justify-center w-full">
-                    <p className="text-md">
-                      No data found for the selected filters.
-                    </p>
+            {!isLoading &&
+              filteredFeedItems.length === 0 &&
+              data?.filterValues && (
+                <>
+                  <DivHistory
+                    data={[]}
+                    accountsInfo={data?.filterValues?.uniqueAccs}
+                    filterValues={data.filterValues}
+                    activeFilters={activeFilters}
+                    setActiveFilters={setActiveFilters}
+                  />
+                  <div className="overflow-hidden rounded-lg bg-gray-200 !w-[500px]">
+                    <div className="px-4 py-5 sm:p-6 flex items-center justify-center w-full">
+                      <p className="text-md">
+                        No data found for the selected filters.
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
             {filteredFeedItems.length > 0 && data?.filterValues && (
               <DivHistory
                 data={filteredFeedItems}
