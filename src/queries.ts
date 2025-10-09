@@ -5,6 +5,7 @@ import { sendToBackground } from "@plasmohq/messaging"
 import type { CashAccount, FeedItem, FilterValues, PositionEdge } from "~types"
 import { getCookie } from "~utils/cookie"
 import {
+  fetchAllAccounts,
   getAccountsActivities,
   getAllAccountFiniancials,
   getAllDivItems
@@ -218,6 +219,67 @@ export const useFetchIdentityPositionsQuery = () =>
   useQuery({
     queryKey: ["fetchIdentityPositions"],
     queryFn: getIdentityPositionsFromBackground,
+    refetchOnWindowFocus: false
+  })
+
+const fetchAllAccountsFromAPI = async (): Promise<{
+  accounts: Array<{
+    id: string
+    nickname: string
+    type: string
+    unifiedAccountType: string
+    status: string
+    currency: string
+  }> | null
+  needLogin?: boolean
+}> => {
+  const cookies = await getCookie()
+
+  if (!cookies) {
+    return {
+      accounts: null,
+      needLogin: true
+    }
+  }
+
+  const decodedCookie = decodeURIComponent(cookies.value)
+  const parsedCookie = JSON.parse(decodedCookie)
+
+  const identityId = parsedCookie.identity_canonical_id
+  const accessToken = parsedCookie.access_token
+
+  const response = await fetchAllAccounts(accessToken, identityId)
+
+  if (!response?.data?.identity?.accounts?.edges) {
+    return {
+      accounts: null
+    }
+  }
+
+  const accounts = response.data.identity.accounts.edges
+    .map((edge: any) => edge.node)
+    .filter(
+      (account: any) =>
+        account.status?.toLowerCase() === "open" && account?.archivedAt === null
+    )
+    .map((account: any) => ({
+      id: account.id,
+      nickname: account.nickname || "",
+      type: account.type || "",
+      unifiedAccountType: account.unifiedAccountType || "",
+      status: account.status || "",
+      currency: account.currency || ""
+    }))
+
+  return {
+    accounts
+  }
+}
+
+export const useFetchAllAccountsQuery = () =>
+  useQuery({
+    queryKey: ["fetchAllAccounts"],
+    queryFn: fetchAllAccountsFromAPI,
     refetchOnWindowFocus: false
   })
 

@@ -324,7 +324,10 @@ export async function getWSSecurityFundamentals(
 
 export async function getAccountsActivities(
   accessToken: string,
-  accountIds: string[]
+  accountIds: string[],
+  types?: string[],
+  startDate?: string,
+  endDate?: string
 ): Promise<any[]> {
   const data: any = {
     operationName: "FetchActivityFeedItems",
@@ -333,7 +336,9 @@ export async function getAccountsActivities(
       orderBy: "OCCURRED_AT_DESC",
       condition: {
         accountIds: accountIds,
-        endDate: generateTimestampNow()
+        ...(types && types.length > 0 && { types: types }),
+        ...(startDate && { startDate: startDate }),
+        endDate: endDate || generateTimestampNow()
       },
       first: 50
     },

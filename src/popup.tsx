@@ -1,6 +1,9 @@
 import "~style.css"
 
-import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline"
+import {
+  ArrowDownTrayIcon,
+  ChatBubbleLeftRightIcon
+} from "@heroicons/react/24/outline"
 import {
   Alert,
   Button,
@@ -10,10 +13,12 @@ import {
   Spinner
 } from "@material-tailwind/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 
 import AccountsDashboard from "~components/AccountsDashboard"
+import { openExportTab } from "~export"
 import { useFetchRespFromBgQuery } from "~queries"
+import { getCookie } from "~utils/cookie"
 
 const queryClient = new QueryClient()
 
@@ -25,8 +30,19 @@ function Popup() {
   const [feedbackText, setFeedbackText] = useState("")
   const [email, setEmail] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+  const [cookieExists, setCookieExists] = useState(false)
 
   const { cashResp, tradeResp, managedRes } = data || {}
+
+  useEffect(() => {
+    const checkCookie = async () => {
+      const cookie = await getCookie()
+      setCookieExists(!!cookie)
+    }
+    checkCookie()
+  }, [])
+
+  const isLoggedIn = cookieExists
 
   const handleOpenModal = () => {
     if (!openModal) {
@@ -80,19 +96,50 @@ function Popup() {
           WealthSimple Dividend Tracker
         </h2>
 
-        {/* Feedback Icon Button */}
-        <button
-          onClick={handleOpenModal}
-          className="absolute top-0 right-0 p-2 
-          text-gray-900 hover:text-gray-800 hover:bg-gray-200
-           rounded-full transition-colors group"
-          title="Send Feedback"
-          aria-label="Send Feedback">
-          <ChatBubbleLeftRightIcon className="h-5 w-5" />
-          <span className="absolute right-0 top-full mt-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-            Send Feedback
-          </span>
-        </button>
+        {/* Action Buttons */}
+        <div className="absolute top-0 right-0 flex gap-1">
+          {/* Export Activities Icon Button */}
+          <button
+            onClick={async () => {
+              if (isLoggedIn) {
+                await openExportTab()
+              }
+            }}
+            disabled={!isLoggedIn}
+            className={`p-2 rounded-full transition-colors group
+              ${
+                isLoggedIn
+                  ? "text-gray-900 hover:text-gray-800 hover:bg-gray-200 cursor-pointer"
+                  : "text-gray-400 cursor-not-allowed"
+              }`}
+            title={
+              isLoggedIn ? "Export Activities" : "Login required to export"
+            }
+            aria-label="Export Activities">
+            <ArrowDownTrayIcon className="h-5 w-5" />
+            <span
+              className={`absolute right-0 top-full mt-1 px-2 py-1 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none
+                ${!isLoggedIn ? "bg-red-600" : "bg-gray-800"}`}>
+              {isLoggedIn
+                ? "Export Activities"
+                : "Export requires login to WealthSimple"}
+            </span>
+          </button>
+
+          {/* Feedback Icon Button */}
+          <button
+            onClick={handleOpenModal}
+            className="p-2
+            text-gray-900 hover:text-gray-800 hover:bg-gray-200
+             rounded-full transition-colors group"
+            title="Send Feedback"
+            aria-label="Send Feedback">
+            <ChatBubbleLeftRightIcon className="h-5 w-5" />
+            <span className="absolute right-0 top-full mt-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+              Send Feedback
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Feedback Modal */}

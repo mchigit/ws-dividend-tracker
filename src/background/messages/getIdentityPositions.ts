@@ -8,8 +8,8 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   console.log("Received a message to get identity positions:", req)
 
   try {
-    // const storedData = await storage.get("ws-identity-positions")
-    const storedData = null // For testing purposes, we are not using stored data
+    const storedData = await storage.get("ws-identity-positions")
+    // const storedData = null // For testing purposes, we are not using stored data
 
     const cookie = await getCookie()
 
