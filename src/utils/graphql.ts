@@ -327,7 +327,8 @@ export async function getAccountsActivities(
   accountIds: string[],
   types?: string[],
   startDate?: string,
-  endDate?: string
+  endDate?: string,
+  firstPageOnly?: boolean
 ): Promise<any[]> {
   const data: any = {
     operationName: "FetchActivityFeedItems",
@@ -378,6 +379,11 @@ export async function getAccountsActivities(
       (edge) => edge.node
     )
     allActivities.push(...activities)
+
+    // If firstPageOnly is true, skip pagination
+    if (firstPageOnly) {
+      break
+    }
 
     nextCursor = json.data.activityFeedItems.pageInfo.hasNextPage
       ? json.data.activityFeedItems.pageInfo.endCursor

@@ -9,11 +9,11 @@ import Select from "react-select"
 
 import DatePickerField from "~components/DatePickerField"
 import Header from "~components/Header"
-import NeedLoginBanner from "~components/NeedLoginBanner"
-import OldDataBanner from "~components/OldDataBanner"
-import { useFetchAllAccountsQuery, useFetchDivDetailsQuery } from "~queries"
-import { getCookie } from "~utils/cookie"
-import { getAccountsActivities } from "~utils/graphql"
+import { useExportActivitiesMutation, useFetchAllAccountsQuery } from "~queries"
+import {
+  ACTIVITY_TIMEFRAME_PRESETS,
+  ACTIVITY_TYPE_OPTIONS
+} from "~utils/constants"
 
 const queryClient = new QueryClient()
 
@@ -125,138 +125,16 @@ function isManaged(unifiedAccountType: string): boolean {
   return unifiedAccountType?.includes("MANAGED")
 }
 
-const ACTIVITY_TYPE_OPTIONS = [
-  { label: "All Types", value: "all" },
-  { label: "Bonus", value: "Bonus" },
-  { label: "Cash sent and received", value: "Cash sent and received" },
-  { label: "Deposits", value: "Deposits" },
-  { label: "Interest", value: "Interest" },
-  { label: "Purchases", value: "Purchases" },
-  { label: "Refunds and reimbursements", value: "Refunds and reimbursements" },
-  { label: "Transfers", value: "Transfers" },
-  { label: "Withdrawals", value: "Withdrawals" },
-  { label: "Write-offs", value: "Write-offs" }
-]
-
-const TIMEFRAME_PRESETS = [
-  { label: "All", value: "all" },
-  { label: "Last 7 days", value: "7d" },
-  { label: "Last 30 days", value: "30d" },
-  { label: "Last 60 days", value: "60d" },
-  { label: "Last 90 days", value: "90d" },
-  { label: "Custom Range", value: "custom" }
-]
-
-// Helper function to convert CalendarDate to ISO string
-function calendarDateToISO(date: CalendarDate | null): string | undefined {
-  if (!date) return undefined
-
-  // Create Date object from CalendarDate
-  const jsDate = new Date(date.year, date.month - 1, date.day)
-
-  // Convert to ISO format matching generateTimestampNow format
-  const year = jsDate.getFullYear()
-  const month = String(jsDate.getMonth() + 1).padStart(2, "0")
-  const day = String(jsDate.getDate()).padStart(2, "0")
-
-  return `${year}-${month}-${day}T00:00:00.000Z`
-}
-
-// Helper function to calculate start date from timeframe preset
-function getStartDateFromTimeframe(preset: string): string | undefined {
-  if (preset === "all") return undefined
-
-  const now = new Date()
-  let daysAgo = 0
-
-  switch (preset) {
-    case "7d":
-      daysAgo = 7
-      break
-    case "30d":
-      daysAgo = 30
-      break
-    case "60d":
-      daysAgo = 60
-      break
-    case "90d":
-      daysAgo = 90
-      break
-    default:
-      return undefined
-  }
-
-  const startDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000)
-  return startDate.toISOString()
-}
-
-// Helper function to convert activities to CSV
-function convertActivitiesToCSV(activities: any[]): string {
-  if (activities.length === 0) return ""
-
-  // Define CSV headers
-  const headers = [
-    "Date",
-    "Account ID",
-    "Type",
-    "Sub Type",
-    "Description",
-    "Amount",
-    "Currency",
-    "Asset Symbol",
-    "Asset Quantity",
-    "Status",
-    "Canonical ID"
-  ]
-
-  // Convert activities to CSV rows
-  const rows = activities.map((activity) => [
-    activity.occurredAt || "",
-    activity.accountId || "",
-    activity.type || "",
-    activity.subType || "",
-    activity.aftTransactionCategory || activity.spendMerchant || "",
-    activity.amount || "",
-    activity.currency || "",
-    activity.assetSymbol || "",
-    activity.assetQuantity || "",
-    activity.status || "",
-    activity.canonicalId || ""
-  ])
-
-  // Combine headers and rows
-  const csvContent = [
-    headers.join(","),
-    ...rows.map((row) =>
-      row
-        .map((cell) =>
-          // Escape commas and quotes in cell values
-          typeof cell === "string" && (cell.includes(",") || cell.includes('"'))
-            ? `"${cell.replace(/"/g, '""')}"`
-            : cell
-        )
-        .join(",")
-    )
-  ].join("\n")
-
-  return csvContent
-}
-
-// Helper function to download CSV
-function downloadCSV(csvContent: string, filename: string) {
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-  const link = document.createElement("a")
-  const url = URL.createObjectURL(blob)
-
-  link.setAttribute("href", url)
-  link.setAttribute("download", filename)
-  link.style.visibility = "hidden"
-
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-
-  URL.revokeObjectURL(url)
+type PreviewData = {
+  date: string
+  accountName: string
+  activityType: string
+  description: string
+  amount: string
+  security: string
+  quantity: string
+  status: string
+  notes: string
 }
 
 function WsExportPage() {
@@ -268,7 +146,7 @@ function WsExportPage() {
   const [timeframeOption, setTimeframeOption] = useState<{
     label: string
     value: string
-  }>(TIMEFRAME_PRESETS[0])
+  }>(ACTIVITY_TIMEFRAME_PRESETS[0])
   const [customDateRange, setCustomDateRange] = useState<{
     startDate: CalendarDate | null
     endDate: CalendarDate | null
@@ -276,14 +154,12 @@ function WsExportPage() {
     startDate: null,
     endDate: null
   })
-  const [isExporting, setIsExporting] = useState(false)
-  const [exportError, setExportError] = useState<string | null>(null)
+  const [previewData, setPreviewData] = useState<PreviewData[] | null>(null)
 
-  const { data } = useFetchDivDetailsQuery()
   const { data: accountsData, isLoading: accountsLoading } =
     useFetchAllAccountsQuery()
 
-  console.log(accountsData)
+  const exportMutation = useExportActivitiesMutation()
 
   // Sort accounts by display name in ascending order
   const sortedAccounts = accountsData?.accounts
@@ -314,9 +190,7 @@ function WsExportPage() {
     setSelectedAccounts(sortedAccounts.map((account) => account.id))
   }
 
-  const handleTypeChange = (
-    selected: { label: string; value: string }[]
-  ) => {
+  const handleTypeChange = (selected: { label: string; value: string }[]) => {
     if (!selected || selected.length === 0) {
       // If cleared, default back to "All Types"
       setSelectedTypes([{ label: "All Types", value: "all" }])
@@ -338,92 +212,44 @@ function WsExportPage() {
     }
   }
 
-  const handleExportCSV = async () => {
-    setIsExporting(true)
-    setExportError(null)
-
+  const handlePreviewData = async () => {
     try {
-      // 1. Get access token from cookie
-      const cookie = await getCookie()
-      if (!cookie) {
-        throw new Error("Not authenticated. Please log in to WealthSimple.")
-      }
-
-      const parsedCookie = JSON.parse(decodeURIComponent(cookie.value))
-      const accessToken = parsedCookie.access_token
-
-      // 2. Calculate date range based on timeframe selection
-      let startDate: string | undefined
-      let endDate: string | undefined
-
-      if (timeframeOption.value === "custom") {
-        // Use custom date range
-        startDate = calendarDateToISO(customDateRange.startDate)
-        endDate = calendarDateToISO(customDateRange.endDate)
-
-        if (!startDate || !endDate) {
-          throw new Error(
-            "Please select both start and end dates for custom range."
-          )
-        }
-      } else {
-        // Use preset timeframe
-        startDate = getStartDateFromTimeframe(timeframeOption.value)
-        endDate = undefined // Will default to now in getAccountsActivities
-      }
-
-      // 3. Fetch activities using getAccountsActivities
-      // Determine types filter
-      const hasAllTypes = selectedTypes.some((item) => item.value === "all")
-      const typesFilter = hasAllTypes
-        ? undefined
-        : selectedTypes.map((t) => t.value)
-
-      const activities = await getAccountsActivities(
-        accessToken,
+      const result = await exportMutation.mutateAsync({
         selectedAccounts,
-        typesFilter, // Pass undefined if "All Types", otherwise array of selected types
-        startDate,
-        endDate
-      )
+        selectedTypes,
+        timeframeOption,
+        customDateRange,
+        accounts: sortedAccounts,
+        firstPageOnly: true
+      })
 
-      if (!activities || activities.length === 0) {
-        throw new Error(
-          "No activities found for the selected accounts and timeframe."
-        )
-      }
+      setPreviewData(result as PreviewData[])
+    } catch (error) {
+      console.error("Preview error:", error)
+    }
+  }
 
-      // 4. Convert to CSV
-      const csvContent = convertActivitiesToCSV(activities)
+  const handleExportCSV = async () => {
+    try {
+      await exportMutation.mutateAsync({
+        selectedAccounts,
+        selectedTypes,
+        timeframeOption,
+        customDateRange,
+        accounts: sortedAccounts
+      })
 
-      // 5. Generate filename with timestamp
-      const timestamp = new Date().toISOString().split("T")[0]
-      const filename = `wealthsimple-activities-${timestamp}.csv`
-
-      // 6. Download CSV
-      downloadCSV(csvContent, filename)
-
-      // 7. Close modal
+      // Close modal on success
       setOpenModal(false)
     } catch (error) {
+      // Error is handled by mutation state
       console.error("Export error:", error)
-      setExportError(
-        error instanceof Error ? error.message : "Failed to export activities"
-      )
-    } finally {
-      setIsExporting(false)
     }
   }
 
   return (
     <div className="w-full">
       <Header />
-      {data && data.needLogin && (
-        <div className="w-full flex items-center justify-center mt-32">
-          <NeedLoginBanner />
-        </div>
-      )}
-      {data && data.isOldData === true && <OldDataBanner />}
       <div className="w-full p-8 mx-auto max-w-7xl">
         <h1 className="text-3xl font-bold mb-6">Export Activities</h1>
 
@@ -624,7 +450,7 @@ function WsExportPage() {
                             selected as { label: string; value: string }
                           )
                         }
-                        options={TIMEFRAME_PRESETS}
+                        options={ACTIVITY_TIMEFRAME_PRESETS}
                         isMulti={false}
                         placeholder="Select timeframe"
                         isClearable={false}
@@ -715,7 +541,13 @@ function WsExportPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-3">
+                  <Button
+                    color="gray"
+                    onClick={handlePreviewData}
+                    disabled={selectedAccounts.length === 0 || exportMutation.isPending}>
+                    {exportMutation.isPending ? "Loading..." : "Preview Data"}
+                  </Button>
                   <Button
                     color="blue"
                     onClick={handleOpenModal}
@@ -723,6 +555,99 @@ function WsExportPage() {
                     Export to CSV
                   </Button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Preview Table */}
+        {previewData && (
+          <div className="mt-6 rounded-lg bg-white shadow border-2 border-gray-300">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Data Preview
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Showing first 50 activities matching your filters
+                  </p>
+                </div>
+                <Button
+                  color="gray"
+                  size="sm"
+                  onClick={() => setPreviewData(null)}>
+                  Close Preview
+                </Button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Account
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Security
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Quantity
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Notes
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {previewData.map((row, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {row.date}
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {row.accountName}
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {row.activityType}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-900">
+                          {row.description}
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {row.amount}
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {row.security}
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {row.quantity}
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {row.status}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-500">
+                          {row.notes}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -755,7 +680,7 @@ function WsExportPage() {
           </div>
 
           <div className="py-4">
-            {isExporting ? (
+            {exportMutation.isPending ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <Spinner className="h-12 w-12 mb-4" />
                 <p className="text-gray-700 font-medium">Generating CSV...</p>
@@ -788,9 +713,13 @@ function WsExportPage() {
                 </p>
 
                 {/* Show error if any */}
-                {exportError && (
+                {exportMutation.isError && (
                   <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-700 text-sm">{exportError}</p>
+                    <p className="text-red-700 text-sm">
+                      {exportMutation.error instanceof Error
+                        ? exportMutation.error.message
+                        : "Failed to export activities"}
+                    </p>
                   </div>
                 )}
               </>
@@ -798,11 +727,17 @@ function WsExportPage() {
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button color="gray" onClick={handleOpenModal} disabled={isExporting}>
+            <Button
+              color="gray"
+              onClick={handleOpenModal}
+              disabled={exportMutation.isPending}>
               Cancel
             </Button>
-            <Button color="blue" onClick={handleExportCSV} disabled={isExporting}>
-              {isExporting ? "Exporting..." : "Export"}
+            <Button
+              color="blue"
+              onClick={handleExportCSV}
+              disabled={exportMutation.isPending}>
+              {exportMutation.isPending ? "Exporting..." : "Export"}
             </Button>
           </div>
         </div>
